@@ -35,7 +35,7 @@
 /* [Co pokazać] */
 // Części do druku albo podgląd złożenia
 part = "print"; // [print:Podstawa + pokrywa do druku, print_all:Wszystkie 3 części do druku, base:Podstawa, lid:Pokrywa, mount:Uchwyt ścienny, wall:Podgląd - na ścianie, assembly:Podgląd - złożona, exploded:Podgląd - rozłożona, section:Podgląd - przekrój]
-// W podglądzie pokaż płytki i kable (półprzezroczyste, nie trafiają do STL)
+// W podglądzie (F5) pokaż kolorowe modele płytek i kabli; w renderze F6 i w STL ich nie ma
 show_pcb = true;
 
 /* [NodeMCU V3] */
@@ -702,7 +702,8 @@ module scene(lift = 0, cut = false) {
         translate([-1, -1, -1]) cube([L + 2, yc + 1, H + 60]);
     }
     else enclosure(lift);
-    if (show_pcb) %models();    // tło: widoczne w F5, pomijane w F6 i w STL
+    // kolorowe płytki i kable tylko w podglądzie F5 ($preview); F6 i STL zawierają samą obudowę
+    if (show_pcb && $preview) models();
 }
 
 // widok na ścianie: obudowa wysunięta o "slide" nad uchwyt (wsuwanie od góry)
@@ -714,14 +715,19 @@ module wall_view(slide = 25) {
     }
 }
 
-if (part == "print")         { base(); translate([0, -W - 6, 0]) lid_print(); }
+// kolory części (widać je w podglądzie; do STL kolor nie trafia)
+c_base  = [0.93, 0.93, 0.9];
+c_lid   = [0.62, 0.78, 0.93];
+c_mount = [0.98, 0.62, 0.2];
+
+if (part == "print")         { color(c_base) base(); color(c_lid) translate([0, -W - 6, 0]) lid_print(); }
 else if (part == "print_all") {
-    translate([-m_xo + 1, 0, 0]) { base(); translate([0, -W - 6, 0]) lid_print(); }
-    translate([0, W + 8, 0]) mount_print();
+    translate([-m_xo + 1, 0, 0]) { color(c_base) base(); color(c_lid) translate([0, -W - 6, 0]) lid_print(); }
+    color(c_mount) translate([0, W + 8, 0]) mount_print();
 }
-else if (part == "base")     base();
-else if (part == "lid")      lid_print();
-else if (part == "mount")    mount_print();
+else if (part == "base")     color(c_base) base();
+else if (part == "lid")      color(c_lid) lid_print();
+else if (part == "mount")    color(c_mount) mount_print();
 else if (part == "wall")     wall_view();
 else if (part == "assembly") scene();
 else if (part == "exploded") scene(32);
