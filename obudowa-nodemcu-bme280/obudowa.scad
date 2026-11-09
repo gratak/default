@@ -1,32 +1,40 @@
 // =====================================================================
 //  Obudowa czujnika:  NodeMCU V3 (ESP8266, CH340C, USB-C)  +  GY-BME/P280
 // ---------------------------------------------------------------------
+//  Plik daje DWIE CZĘŚCI DO DRUKU: podstawę i pokrywę.
+//    part = "print" (domyślnie) - obie części ułożone do druku
+//    part = "base" / "lid"      - jedna część; F6, potem F7 = plik STL
+//    part = "assembly" / "exploded" / "section" - tylko podgląd złożenia;
+//           płytki i kable są wtedy półprzezroczystym tłem i nie trafiają do STL
+//
 //  Dwie komory w jednym pudełku:
-//    * ELEKTRONIKA – podłużne szczeliny (ściany, pokrywa, dno),
-//                    otwór USB-C w ścianie czołowej
-//    * CZUJNIK     – ażur (plaster miodu albo okrągłe oczka) ze wszystkich stron
-//  Między nimi lita przegroda. Domyślnie jest PODWÓJNA: dwie pełne ścianki
-//  i pionowa szczelina powietrzna otwarta w dnie i w pokrywie (komin),
-//  więc ciepło od ESP uchodzi do góry zamiast grzać komorę czujnika.
+//    * ELEKTRONIKA – podłużne szczeliny (ściany, pokrywa, dno), USB-C z boku
+//    * CZUJNIK     – ażur (plaster miodu albo okrągłe oczka)
+//  Między nimi lita przegroda. Domyślnie PODWÓJNA: dwie pełne ścianki
+//  i pionowa szczelina powietrzna otwarta w dnie i w pokrywie (komin).
 //  therm_gap = 0  ->  zwykła pojedyncza lita ścianka.
 //
-//  Płytka leży tak jak na zdjęciach: elementami (ESP-12, USB-C) w DÓŁ,
+//  NodeMCU leży jak na zdjęciach: elementami (ESP-12, USB-C) w DÓŁ,
 //  pinami i kablami do GÓRY, na 4 dystansach pod otworami 52 x 25 mm.
-//  Czujnik leży poziomo pod ażurową pokrywą, układem BME280 do góry,
-//  przykręcony 2 wkrętami do słupków przy ścianie końcowej; wtyczka dupont
-//  1x6 zwisa w dół. Wkręca się z góry przy zdjętej pokrywie, bez nakrętek.
-//  (sensor_mount = "cradle": stara wersja - wtyczka w kołysce + docisk.)
-//  Kable przechodzą przez wycięcie u góry przegrody (pokrywa je zamyka).
 //
-//  DRUK (bez podpór): part = "base" i part = "lid" (pokrywa jest już
-//  obrócona górą do stołu) albo part = "print" – obie części naraz.
+//  CZUJNIK stoi pionowo i razem z wtyczką dupont 1x6 tworzy literę L:
+//  układ BME280 patrzy na ażurową ścianę końcową, wtyczka leży poziomo
+//  na podeście, kable wychodzą w stronę przegrody. Płytka jest przykręcona
+//  2 wkrętami M2.5 x 6 do ramki za nią; śrubokręt (najlepiej magnetyczny)
+//  wkłada się przez okienko w ścianie końcowej.
+//
+//  KABLE CZUJNIKA: z wtyczki poziomo do przegrody, przy niej w górę,
+//  przez przepust u góry przegrody (10 x 4 mm, pokrywa domyka go żebrem),
+//  dalej górą komory elektroniki do pinów NodeMCU. Trasa ok. 7-8 cm.
+//
+//  DRUK bez podpór: podstawa dnem do stołu, pokrywa górą do stołu.
 //  PLA/PETG, warstwa 0.2 mm, 3 obrysy, wypełnienie 20 %.
 // =====================================================================
 
-/* [Widok / eksport] */
-// Co pokazać. Do STL: "base" i "lid" (już ułożone do druku) albo "print"
-part = "assembly"; // [assembly:Złożenie, exploded:Rozłożone, section:Przekrój, base:Podstawa (STL), lid:Pokrywa (STL), print:Obie części do druku]
-// Poglądowe modele płytek i kabli (tylko w podglądzie)
+/* [Co pokazać] */
+// Części do druku albo podgląd złożenia
+part = "print"; // [print:Obie części do druku, base:Podstawa, lid:Pokrywa, assembly:Podgląd - złożona, exploded:Podgląd - rozłożona, section:Podgląd - przekrój]
+// W podglądzie pokaż płytki i kable (półprzezroczyste, nie trafiają do STL)
 show_pcb = true;
 
 /* [NodeMCU V3] */
@@ -48,7 +56,7 @@ usb_z = -1.6;
 // Przesunięcie gniazda w poprzek względem środka płytki
 usb_y = 0;
 
-/* [Mocowanie płytki] */
+/* [Mocowanie NodeMCU] */
 // screw = wkręty w dystanse; peg = kołki w otworach + dociski w pokrywie
 board_fix = "screw"; // [screw:Wkręty, peg:Kołki i docisk pokrywą]
 standoff_d = 5;
@@ -59,29 +67,29 @@ peg_d = 2.6;
 // Otworki w dnie pod przyciskami RST i FLASH (wciskane spinaczem)
 button_holes = true;
 
-/* [Komora czujnika] */
-sens_len = 30;     // długość wewnętrzna komory czujnika
-// screw = płytka przykręcona do 2 słupków; cradle = wtyczka w kołysce + docisk pokrywą
-sensor_mount = "screw"; // [screw:Przykręcany do słupków, cradle:Wtyczka w kołysce + docisk]
-sens_w = 15.5;     // płytka czujnika: bok wzdłuż rzędu pinów
-sens_d = 11.6;     // płytka czujnika: bok od pinów do otworów
-sens_t = 1.6;      // grubość płytki czujnika
-// Rozstaw otworów montażowych czujnika (środek-środek) - ZMIERZ swój egzemplarz
-sens_hole_dx = 10.7;
-// Środek otworów od krawędzi płytki (tej bez pinów)
-sens_hole_e = 2.5;
-sens_post_d = 5.5; // średnica słupków
-// Otwór pod wkręt: M2.5 samogwintujący ~2.2 mm, M3 ~2.6 mm (otwory w czujniku ~3 mm)
+/* [Czujnik BME280] */
+sens_len = 30;      // długość wewnętrzna komory czujnika
+// screw = płytka przykręcona do ramki; cradle = bez wkrętów (wtyczka w kołysce, docisk pokrywą)
+sensor_mount = "screw"; // [screw:Przykręcany do ramki, cradle:Wtyczka w kołysce + docisk]
+sens_w = 15.5;      // szerokość płytki czujnika (wzdłuż rzędu pinów)
+sens_d = 11.6;      // wysokość płytki czujnika (od krawędzi z pinami do przeciwnej)
+sens_t = 1.6;       // grubość płytki czujnika
+// Rozstaw otworów montażowych czujnika (środek-środek)
+sens_hole_dx = 10;
+// Odległość: oś rzędu pinów -> oś otworów montażowych (sprawdź na swojej płytce)
+sens_pin_hole = 8.2;
+// Otwór pod wkręt w ramce: M2.5 samogwintujący ~2.2 mm, M3 ~2.6 mm
 sens_pilot_d = 2.2;
-sens_wall_gap = 3; // odstęp płytki od ażurowej ściany końcowej
-// Luz nad płytką czujnika (łebki wkrętów, końcówki pinów) do spodu pokrywy
-sens_top_clear = 4.5;
-plug_w = 15.24;    // szerokość wtyczki dupont 1x6 (6 x 2.54)
-plug_h = 2.54;     // grubość wtyczki
+// Odstęp strony z układem BME280 od ściany końcowej (mieszczą się łebki wkrętów)
+sens_gap = 4.5;
+// Wysokość okienka na śrubokręt w ścianie końcowej
+win_h = 5.5;
+plug_w = 15.24;     // szerokość wtyczki dupont 1x6 (6 x 2.54)
+plug_h = 2.54;      // grubość wtyczki
+plug_ped = 2;       // wtyczka leży na podeście tej wysokości (czujnik nad dnem)
 // --- tylko dla sensor_mount = "cradle" ---
-plug_ped = 2;      // podest pod wtyczką - czujnik wisi nad dnem
-cradle_x = 6;      // początek kołyski (od przegrody)
-cradle_len = 10;   // długość kołyski
+cradle_x = 6;       // początek kołyski (od przegrody)
+cradle_len = 10;    // długość kołyski
 // Słupek w pokrywie dociskający wtyczkę czujnika
 plug_holddown = true;
 
@@ -148,26 +156,36 @@ holes = [for (i = [0, 1], j = [0, 1])
          [pcb_x0 + (pcb_l - hole_dx)/2 + i*hole_dx,
           pcb_y0 + (pcb_w - hole_dy)/2 + j*hole_dy]];
 
-// czujnik przykręcany (sensor_mount = "screw")
+// --- czujnik (układ L: płytka pionowo, wtyczka poziomo) ---
 screw_s  = sensor_mount == "screw";
-sens_z0  = Hb - sens_top_clear - sens_t;   // spód płytki czujnika = góra słupków
-sens_x1  = x_s1 - sens_wall_gap;           // krawędź płytki od strony ściany końcowej
-sens_x0  = sens_x1 - sens_d;               // krawędź z pinami (wtyczka zwisa tutaj)
-spost_x  = sens_x1 - sens_hole_e;          // oś słupków
-spost_ys = [yc - sens_hole_dx/2, yc + sens_hole_dx/2];
-spost_base = sens_post_d + 2;              // średnica stożkowej podstawy słupka
+hl       = 12.5;                              // długość wtyczki dupont (model poglądowy)
+pin_z    = floor_t + plug_ped + plug_h/2;     // oś rzędu pinów = oś wtyczki
+s_hz     = pin_z + sens_pin_hole;             // oś otworów montażowych
+s_hys    = [yc - sens_hole_dx/2, yc + sens_hole_dx/2];
+s_back   = screw_s ? x_s1 - sens_gap - sens_t // tył płytki (strona z wtyczką)
+                   : x_s0 + 5.5 + hl + 2.5;
+s_face   = s_back + sens_t;                   // strona z układem BME280
+plug_end = s_back - 2.5 - hl;                 // koniec wtyczki, z którego wychodzą kable
 
-// czujnik w kołysce (sensor_mount = "cradle")
+// ramka do przykręcenia czujnika: dwie nóżki omijające wtyczkę + poprzeczka
+fr_t   = 5;                 // grubość (X)
+fr_leg = 2.4;               // grubość nóżki (Y)
+fr_in  = plug_w/2 + 0.6;    // wewnętrzna krawędź nóżki od osi
+fr_h   = 7;                 // wysokość poprzeczki
+ped_x0 = s_back - 13.5;     // podest pod wtyczką
+ped_x1 = s_back - 1;
+
+// kołyska (sensor_mount = "cradle")
 holddown  = !screw_s && plug_holddown;
 rail_t    = 1.2;
 cradle_iw = plug_w + 0.4;
-plug_z    = floor_t + plug_ped;    // spód wtyczki czujnika
+plug_z    = floor_t + plug_ped;               // spód wtyczki
 post_x    = x_s0 + cradle_x + cradle_len/2;
 
 echo(str("Obudowa zewn.: ", L, " x ", W, " x ", H, " mm  (dł. x szer. x wys.)"));
 if (screw_s)
-    echo(str("Czujnik: słupki ", sens_z0 - floor_t, " mm = miejsce pod płytką na wtyczkę ",
-             "(2.5 + 12..14 mm) i zagięcie kabli"));
+    echo(str("Czujnik: otwory montażowe ", s_hz, " mm nad spodem obudowy, ",
+             "rozstaw ", sens_hole_dx, " mm; wkręty M2.5x6 przez okienko w ścianie końcowej"));
 
 // ---------------------------------------------------------------------
 //  Pomocnicze kształty 2D
@@ -203,10 +221,16 @@ function hit(cx, cy, rx, ry, ex) =
                           cy + ry > e[1] && cy - ry < e[3]) 1]) > 0;
 function hitc(cx, cy, rr, ec) =
     len([for (c = ec) if (norm([cx - c[0], cy - c[1]]) < c[2] + rr) 1]) > 0;
+// odległość punktu p od odcinka a-b
+function seg_dist(p, a, b) =
+    let(ab = b - a, t = max(0, min(1, ((p - a)*ab) / (ab*ab)))) norm(p - (a + t*ab));
+function hits(cx, cy, rr, es) =
+    len([for (s = es) if (seg_dist([cx, cy], [s[0], s[1]], [s[2], s[3]]) < s[4] + rr) 1]) > 0;
 
-// siatka oczek (plaster miodu) mieszcząca się w prostokącie w x h
-// z marginesem m; ex = prostokąty [x0,y0,x1,y1], ec = koła [x,y,r] bez otworów
-module cell_grid(w, h, m = 1.2, ex = [], ec = []) {
+// siatka oczek (plaster miodu) mieszcząca się w prostokącie w x h z marginesem m;
+// bez otworów w miejscach: ex = prostokąty [x0,y0,x1,y1], ec = koła [x,y,r],
+// es = podłużne otwory [x0,y0,x1,y1,r] (odcinek + promień)
+module cell_grid(w, h, m = 1.2, ex = [], ec = [], es = []) {
     f  = hole_size;
     hh = hole_shape == "hex" ? 2*hole_size/sqrt(3) : hole_size;
     px = f + hole_web;
@@ -221,7 +245,7 @@ module cell_grid(w, h, m = 1.2, ex = [], ec = []) {
             cy = oy + j*py;
             if (cx + f/2 <= w - m + eps &&
                 !hit(cx, cy, f/2 + hole_web/2, hh/2 + hole_web/2, ex) &&
-                !hitc(cx, cy, hh/2, ec))
+                !hitc(cx, cy, hh/2, ec) && !hits(cx, cy, hh/2, es))
                 translate([cx, cy]) cell();
         }
 }
@@ -247,6 +271,11 @@ module ridge(len, h) {
 module both_sides() {
     children();
     translate([0, W, 0]) mirror([0, 1, 0]) children();
+}
+
+// okienko w ścianie końcowej na śrubokręt (przed układem BME280)
+module sensor_window_2d() {
+    hull() for (y = s_hys) translate([y, s_hz]) circle(d = win_h);
 }
 
 // ---------------------------------------------------------------------
@@ -282,13 +311,15 @@ module base() {
                 }
             }
             if (screw_s) {
-                // dwa słupki pod czujnik + łącznik usztywniający
-                for (y = spost_ys) translate([spost_x, y, floor_t - eps]) {
-                    cylinder(d1 = spost_base, d2 = sens_post_d, h = 1);
-                    cylinder(d = sens_post_d, h = sens_z0 - floor_t + eps);
-                }
-                translate([spost_x - 0.8, spost_ys[0], floor_t - eps])
-                    cube([1.6, sens_hole_dx, sens_z0 - floor_t - 2]);
+                // ramka za płytką czujnika: nóżki po bokach wtyczki + poprzeczka z otworami
+                for (s = [-1, 1])
+                    translate([s_back - fr_t, s > 0 ? yc + fr_in : yc - fr_in - fr_leg, floor_t - eps])
+                        cube([fr_t, fr_leg, s_hz + fr_h/2 - floor_t + eps]);
+                translate([s_back - fr_t, yc - fr_in - fr_leg, s_hz - fr_h/2])
+                    cube([fr_t, 2*(fr_in + fr_leg), fr_h]);
+                // podest pod wtyczką (podpiera ją, nie ustala położenia płytki)
+                translate([ped_x0, yc - plug_w/2, 0])
+                    cube([ped_x1 - ped_x0, plug_w, floor_t + plug_ped - 0.3]);
             } else {
                 // kołyska wtyczki czujnika: podest + dwie prowadnice
                 translate([x_s0 + cradle_x, yc - cradle_iw/2 - rail_t, 0])
@@ -299,11 +330,13 @@ module base() {
             }
         }
 
-        // otwory pod wkręty
+        // otwory pod wkręty NodeMCU
         if (board_fix == "screw")
             for (h = holes) translate([h[0], h[1], 0.8]) cylinder(d = pilot_d, h = Hb);
+        // otwory pod wkręty czujnika (poziomo, w poprzeczce ramki)
         if (screw_s)
-            for (y = spost_ys) translate([spost_x, y, sens_z0 - 7]) cylinder(d = sens_pilot_d, h = 8);
+            for (y = s_hys) translate([s_back - fr_t - 1, y, s_hz]) rotate([0, 90, 0])
+                cylinder(d = sens_pilot_d, h = fr_t + 2);
 
         // USB-C (z fazką od zewnątrz)
         usb_cut();
@@ -331,14 +364,20 @@ module base() {
             for (yb = [7, pcb_w - 7])
                 translate([pcb_x0 + 2.5, pcb_y0 + yb, -1]) cylinder(d = 2.5, h = floor_t + 2);
 
-        // CZUJNIK: ażur w ścianach bocznych, czołowej i w dnie
+        // CZUJNIK: ażur w ścianach bocznych
         through_long_walls(x_s0, floor_t) cell_grid(sens_len, div_top - floor_t);
-        through_end_wall(L - wall, wall, floor_t) cell_grid(in_w, div_top - floor_t);
+        // ... w ścianie końcowej (+ okienko na śrubokręt przed układem)
+        through_end_wall(L - wall, wall, floor_t)
+            cell_grid(in_w, div_top - floor_t, 1.2, [], [],
+                      screw_s ? [[s_hys[0] - wall, s_hz - floor_t, s_hys[1] - wall, s_hz - floor_t,
+                                  win_h/2 + 0.8]] : []);
+        if (screw_s) through_end_wall(L - wall, 0, 0) sensor_window_2d();
+        // ... i w dnie (bez oczek pod ramką i podestem / pod kołyską)
         translate([x_s0, wall, -1]) linear_extrude(floor_t + 2)
-            if (screw_s)   // bez oczek pod słupkami i łącznikiem
+            if (screw_s)
                 cell_grid(sens_len, in_w, 1.2,
-                          [[spost_x - x_s0 - 1.4, spost_ys[0] - wall, spost_x - x_s0 + 1.4, spost_ys[1] - wall]],
-                          [for (y = spost_ys) [spost_x - x_s0, y - wall, spost_base/2 + 0.6]]);
+                          [[ped_x0 - x_s0 - 0.5, yc - fr_in - fr_leg - wall - 0.5,
+                            s_back - x_s0 + 0.5, yc + fr_in + fr_leg - wall + 0.5]]);
             else
                 cell_grid(sens_len, in_w, 1.2,
                           [[cradle_x - 0.5, in_w/2 - cradle_iw/2 - rail_t - 0.5,
@@ -433,7 +472,7 @@ module lid_print() {
 }
 
 // ---------------------------------------------------------------------
-//  Modele poglądowe (nie drukować)
+//  Modele poglądowe płytek i kabli (tylko podgląd, nie drukować)
 // ---------------------------------------------------------------------
 pin_x0 = (pcb_l - 14*2.54) / 2;
 row_y  = [(pcb_w - 27.94)/2, pcb_w - (pcb_w - 27.94)/2];
@@ -472,34 +511,24 @@ module nodemcu_ghost() {
     }
 }
 
-hx = x_s0 + 5.5;   // [cradle] koniec wtyczki czujnika od strony kabli
-hl = 12.5;         // długość wtyczki dupont (model poglądowy)
-spx = sens_x0 + 1.3;                // [screw] oś rzędu pinów czujnika
-spz = sens_z0 - 2.5 - hl;           // [screw] dół zwisającej wtyczki
-
+// czujnik w układzie L: płytka pionowo, listwa + wtyczka poziomo w stronę przegrody
 module bme_ghost() {
-    if (screw_s) {
-        // płytka poziomo, BME280 do góry, wtyczka zwisa przy krawędzi z pinami
-        color([0.36, 0.16, 0.55]) difference() {
-            translate([sens_x0, yc - sens_w/2, sens_z0]) cube([sens_d, sens_w, sens_t]);
-            for (y = spost_ys) translate([spost_x, y, sens_z0 - 1]) cylinder(d = 3, h = sens_t + 2);
-        }
-        color([0.82, 0.82, 0.84]) translate([spost_x - 1.25, yc - 1.25, sens_z0 + sens_t]) cube([2.5, 2.5, 0.93]);
-        color([0.12, 0.12, 0.12]) translate([spx - 1.27, yc - plug_w/2, sens_z0 - 2.5]) cube([2.54, plug_w, 2.5]);
-        color([0.07, 0.07, 0.07]) translate([spx - 1.27, yc - plug_w/2, spz]) cube([2.54, plug_w, hl]);
-        for (i = [0:5]) color([0.85, 0.85, 0.85])
-            translate([spx - 0.32, yc - 6.35 + i*2.54 - 0.32, sens_z0 + sens_t]) cube([0.64, 0.64, 1.8]);
-        // łebki wkrętów
-        for (y = spost_ys) color([0.6, 0.6, 0.65]) translate([spost_x, y, sens_z0 + sens_t]) cylinder(d = 4.5, h = 1.7);
-    } else {
-        color([0.07, 0.07, 0.07]) translate([hx, yc - plug_w/2, plug_z]) cube([hl, plug_w, plug_h]);
-        color([0.12, 0.12, 0.12]) translate([hx + hl, yc - plug_w/2, plug_z]) cube([2.5, plug_w, plug_h]);
-        px = hx + hl + 2.5;
-        color([0.36, 0.16, 0.55]) translate([px, yc - sens_w/2, plug_z]) cube([1.6, sens_w, sens_d]);
-        color([0.82, 0.82, 0.84]) translate([px + 1.6, yc - 1.25, plug_z + 7]) cube([0.9, 2.5, 2.5]);
-        for (i = [0:5]) color([0.85, 0.85, 0.85])
-            translate([px + 1.6, yc - 6.35 + i*2.54 - 0.32, plug_z + plug_h/2 - 0.32]) cube([3.4, 0.64, 0.64]);
+    color([0.36, 0.16, 0.55]) difference() {
+        translate([s_back, yc - sens_w/2, pin_z - 1.3]) cube([sens_t, sens_w, sens_d]);
+        for (y = s_hys) translate([s_back - 1, y, s_hz]) rotate([0, 90, 0]) cylinder(d = 3, h = sens_t + 2);
     }
+    // układ BME280 między otworami, od strony ściany końcowej
+    color([0.82, 0.82, 0.84]) translate([s_face, yc - 1.25, s_hz - 1.25]) cube([0.93, 2.5, 2.5]);
+    // końcówki pinów
+    for (i = [0:5]) color([0.85, 0.85, 0.85])
+        translate([s_face, yc - 6.35 + i*2.54 - 0.32, pin_z - 0.32]) cube([1.8, 0.64, 0.64]);
+    // listwa goldpin + wtyczka dupont 1x6
+    color([0.12, 0.12, 0.12]) translate([s_back - 2.5, yc - plug_w/2, pin_z - plug_h/2]) cube([2.5, plug_w, plug_h]);
+    color([0.07, 0.07, 0.07]) translate([plug_end, yc - plug_w/2, pin_z - plug_h/2]) cube([hl, plug_w, plug_h]);
+    // łebki wkrętów
+    if (screw_s)
+        for (y = s_hys) color([0.6, 0.6, 0.65]) translate([s_face, y, s_hz]) rotate([0, 90, 0])
+            cylinder(d = 4.5, h = 1.7);
 }
 
 wire_cols = [[0.55, 0.3, 0.2], [0.1, 0.1, 0.1], [0.95, 0.95, 0.95],
@@ -510,6 +539,7 @@ module wire(pts, d = 1.3) {
         hull() { translate(pts[k]) sphere(d = d, $fn = 10); translate(pts[k + 1]) sphere(d = d, $fn = 10); }
 }
 
+// kable: z wtyczki czujnika do przegrody, w górę, przez przepust, górą do pinów NodeMCU
 module wires_ghost() {
     zw = div_top - wire_d + 1.5;
     for (i = [0:5]) {
@@ -517,23 +547,22 @@ module wires_ghost() {
         tx = pcb_x0 + t[0];
         ty = pcb_y0 + t[1];
         yn = yc - 3.5 + i*1.4;
-        yp = yc - 6.35 + i*2.54;
-        start = screw_s
-            ? [[spx, yp, spz + 0.5], [spx, yp, spz - 1], [spx - 3, yc - 5 + i*2, floor_t + 1.2],
-               [x_s0 + 1.2, yn, floor_t + 3]]
-            : [[hx, yp, plug_z + plug_h/2], [hx - 2.5, yc - 5 + i*2, plug_z + 2.5],
-               [x_s0 + 1.2, yn, plug_z + 7]];
-        color(wire_cols[i]) wire(concat(start, [
+        color(wire_cols[i]) wire([
+            [plug_end + 0.5, yc - 6.35 + i*2.54, pin_z],
+            [plug_end - 2.5, yc - 5 + i*2, pin_z + 1.5],
+            [x_s0 + 1.2, yn, pin_z + 6],
             [x_s0 + 1.2, yn, zw],
             [x_d1 - 2, yn, zw],
             [tx + (tx < x_d1 - 8 ? 3 : 1.5), ty + (ty > yc ? -1.5 : 1.5), dup_top + 1.2],
             [tx, ty, dup_top + 0.5],
-            [tx, ty, dup_top - 0.5]]));
+            [tx, ty, dup_top - 0.5]]);
     }
 }
 
+module models() { nodemcu_ghost(); bme_ghost(); wires_ghost(); }
+
 // ---------------------------------------------------------------------
-//  Złożenie / wybór części
+//  Wybór części / podgląd
 // ---------------------------------------------------------------------
 module enclosure(lift = 0) {
     color([0.93, 0.93, 0.9]) base();
@@ -545,12 +574,12 @@ module scene(lift = 0, cut = false) {
         translate([-1, -1, -1]) cube([L + 2, yc + 1, H + 60]);
     }
     else enclosure(lift);
-    if (show_pcb) { nodemcu_ghost(); bme_ghost(); wires_ghost(); }
+    if (show_pcb) %models();    // tło: widoczne w F5, pomijane w F6 i w STL
 }
 
-if (part == "assembly")      scene();
-else if (part == "exploded") scene(32);
-else if (part == "section")  scene(0, true);
+if (part == "print")         { base(); translate([0, -W - 6, 0]) lid_print(); }
 else if (part == "base")     base();
 else if (part == "lid")      lid_print();
-else if (part == "print")    { base(); translate([0, -W - 6, 0]) lid_print(); }
+else if (part == "assembly") scene();
+else if (part == "exploded") scene(32);
+else if (part == "section")  scene(0, true);

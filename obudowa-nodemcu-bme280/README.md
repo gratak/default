@@ -16,12 +16,19 @@ Wymiary zewnętrzne: **101 × 38 × 28,6 mm**. Obie części to razem ok. 26 cm�
 | `obudowa.scad` | model parametryczny; wszystkie wymiary są na górze pliku i w panelu Customizer |
 | `stl/obudowa_podstawa.stl` | podstawa ułożona do druku (dnem do stołu) |
 | `stl/obudowa_pokrywa.stl` | pokrywa ułożona do druku (górą do stołu) |
-| `img/` | rendery |
+| `img/` | rendery; `kable.png` pokazuje trasę kabli czujnika |
 
-W `obudowa.scad` zmienna `part` wybiera, co się wyświetla: `assembly`, `exploded`, `section`,
-`base`, `lid` albo `print`. STL robisz tak: ustaw `part`, naciśnij **F6**, potem **F7**.
-Pełny render (F6) trwa kilkanaście sekund. Podgląd F5 przy tylu otworach czasem pokazuje
-artefakty, a F6 zawsze liczy poprawnie.
+### Części w OpenSCAD
+
+Po otwarciu `obudowa.scad` widać **obie części ułożone do druku** (`part = "print"`).
+Pojedynczą część wybierasz w zmiennej `part` (albo w panelu Customizer):
+
+- `base` daje podstawę, `lid` pokrywę. Potem **F6** (render) i **F7** (zapis STL).
+- `assembly`, `exploded` i `section` to tylko podgląd złożenia. Płytki i kable są w nim
+  półprzezroczystym tłem, widocznym w F5. Do renderu F6 ani do pliku STL nie trafiają.
+
+Pełny render F6 trwa kilkanaście sekund. Podgląd F5 przy tylu otworach czasem gubi część otworów,
+a F6 zawsze liczy poprawnie.
 
 ## Najważniejsze założenia (sprawdź przed drukiem)
 
@@ -32,21 +39,27 @@ artefakty, a F6 zawsze liczy poprawnie.
    Jeśli wtyk Twojego kabla jest grubszy, zwiększ `usb_w` i `usb_h`.
 3. **Nad laminatem jest 17 mm miejsca** (`above_clear`) na goldpiny, wtyczki dupont i zagięte kable.
    Jeśli pokrywa naciska na kable, zwiększ ten parametr.
-4. **Czujnik jest przykręcony** dwoma wkrętami do dwóch słupków (18,5 mm) przy ażurowej ścianie końcowej.
-   Płytka leży poziomo, układem BME280 do góry, ok. 3 mm pod ażurową pokrywą. Wtyczka 1×6 zwisa w dół.
-   Wkręca się z góry przy zdjętej pokrywie, bez nakrętek. **Zmierz rozstaw otworów w czujniku**
-   (`sens_hole_dx`, domyślnie 10,7 mm, ustalone ze zdjęcia). Moduły GY-BME280 mają płytkę ok. 15,5 × 11,6 mm
-   i otwory Ø 3–3,5 mm, ale rozstawu sklepy nie podają.
-   Dawna wersja (wtyczka w kołysce + docisk pokrywą) jest dostępna jako `sensor_mount = "cradle"`.
-5. **Przegroda** jest domyślnie podwójna. Między ściankami jest 3 mm szczeliny powietrznej,
+4. **Czujnik stoi pionowo i razem z wtyczką tworzy literę L.** Układ BME280 patrzy na ażurową
+   ścianę końcową (ok. 4,5 mm od niej), a wtyczka 1×6 leży poziomo na podeście.
+   Płytka jest przykręcona 2 wkrętami do ramki za nią. Ramka ma dwie nóżki po bokach wtyczki
+   i poprzeczkę z otworami w rozstawie **10 mm** (`sens_hole_dx`).
+   Wysokość otworów liczona jest od osi rzędu pinów: `sens_pin_hole` = 8,2 mm, ustalone ze zdjęcia.
+   Zmierz to na swojej płytce; luz w otworach czujnika wybacza ok. ±0,3 mm.
+5. **Kable czujnika** wychodzą z wtyczki poziomo w stronę przegrody i przy niej idą w górę.
+   Przechodzą przez przepust 10 × 4 mm u góry przegrody, który pokrywa domyka żebrem.
+   Dalej biegną górą komory elektroniki do pinów NodeMCU. Trasa ma ok. 7–8 cm, więc przewody 10 cm wystarczą.
+6. **Przegroda** jest domyślnie podwójna. Między ściankami jest 3 mm szczeliny powietrznej,
    otwartej w dnie i w pokrywie, więc działa jak komin i ciepło z ESP uchodzi do góry.
    `therm_gap = 0` daje zwykłą pojedynczą litą ściankę, a obudowa skraca się o 5 mm.
+
+Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokrywie): `sensor_mount = "cradle"`.
 
 ## Druk
 
 - PLA wystarczy do pomieszczeń; w słońcu lub przy grzejniku użyj PETG albo ASA.
 - Warstwa 0,2 mm, 3 obrysy, wypełnienie 15–20 %, **bez podpór**. Oczka są sześciokątami
-  „ostrzem do góry”, a rowki zatrzasku mają ścianki pod 45°, więc nie potrzebują podpór.
+  „ostrzem do góry”, rowki zatrzasku mają ścianki pod 45°, a poprzeczka ramki czujnika
+  to krótki most (16 mm), więc nic nie wymaga podpór.
 - Pokrywa trzyma się na kołnierzu i 4 ząbkach zatrzasku. Jeśli wchodzi za ciasno, zwiększ `fit` (np. 0.3)
   albo zmniejsz `snap` (np. 0.3). Przy obu końcach są wcięcia do podważenia pokrywy.
 
@@ -55,13 +68,15 @@ artefakty, a F6 zawsze liczy poprawnie.
 1. Przykręć NodeMCU 4 wkrętami **M2.5 × 6** samogwintującymi (`pilot_d = 2.2`).
    Pod M3 ustaw `pilot_d = 2.6`. Jeśli nie masz wkrętów, ustaw `board_fix = "peg"`:
    wtedy na dystansach są kołki, a pokrywa ma 4 dociski, które trzymają płytkę.
-2. Nałóż wtyczkę na piny czujnika. Połóż czujnik na słupkach układem BME280 do góry, pinami w stronę
-   przegrody, i przykręć go 2 wkrętami **M2.5 × 6** (`sens_pilot_d = 2.2`; pod M3 ustaw 2.6).
-3. Poprowadź 6 przewodów spod wtyczki po dnie do przegrody, w górę i przez wycięcie u góry przegrody,
-   a potem podłącz je do pinów NodeMCU.
-4. Przepust zatkaj kawałkiem pianki, plasteliny albo kroplą kleju na gorąco,
+2. Nałóż wtyczkę na piny czujnika. Włóż czujnik od góry między ścianę końcową a ramkę:
+   układem BME280 do ściany, wtyczką między nóżkami ramki, tak żeby leżała na podeście.
+3. Przytrzymaj płytkę palcem od góry. Przez okienko w ścianie końcowej wkręć 2 wkręty
+   **M2.5 × 6** w poprzeczkę ramki. Najwygodniej śrubokrętem z magnesem: wkręt siedzi na
+   końcówce i przechodzi przez okienko. Pod M3 ustaw `sens_pilot_d = 2.6`.
+4. Poprowadź 6 przewodów do przegrody, w górę i przez przepust, a potem podłącz je do pinów NodeMCU.
+5. Przepust zatkaj kawałkiem pianki, plasteliny albo kroplą kleju na gorąco,
    żeby ciepłe powietrze nie przechodziło do komory czujnika.
-5. Zatrzaśnij pokrywę. Przez otworki w dnie można spinaczem wcisnąć RST i FLASH.
+6. Zatrzaśnij pokrywę. Przez otworki w dnie można spinaczem wcisnąć RST i FLASH.
 
 ## Żeby odczyt temperatury był dokładny
 
