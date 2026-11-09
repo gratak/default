@@ -20,7 +20,7 @@
 //  CZUJNIK stoi pionowo i razem z wtyczką dupont 1x6 tworzy literę L
 //  (odwróconą: piny i wtyczka u góry). Układ BME280 patrzy na ażurową
 //  ścianę końcową. Moduł z założoną wtyczką wkłada się od góry przed
-//  niską ramkę i stawia na półce; potem 2 wkręty M2.5 x 6 przez okienko
+//  niską ramkę i stawia na półce; potem 2 wkręty M2 x 6 przez okienko
 //  w ścianie końcowej (śrubokręt najlepiej magnetyczny).
 //  Komora ma 40 mm: moduł z pinami i zagiętymi kablami (ok. 30 mm) + luz.
 //
@@ -61,8 +61,8 @@ usb_y = 0;
 // screw = wkręty w dystanse; peg = kołki w otworach + dociski w pokrywie
 board_fix = "screw"; // [screw:Wkręty, peg:Kołki i docisk pokrywą]
 standoff_d = 5;
-// Otwór pod wkręt: M2.5 samogwintujący ~2.2 mm, M3 ~2.6 mm
-pilot_d = 2.2;
+// Otwór pod wkręt: M2 samogwintujący ~1.7 mm (M2.5 ~2.2 mm, M3 ~2.6 mm)
+pilot_d = 1.7;
 // Średnica kołka (otwory w płytce mają ok. 3 mm)
 peg_d = 2.6;
 // Otworki w dnie pod przyciskami RST i FLASH (wciskane spinaczem)
@@ -81,8 +81,8 @@ sens_hole_dx = 10;
 sens_pin_hole = 8.2;
 // Odległość: oś otworów -> krawędź płytki bez pinów (tą krawędzią płytka stoi na półce)
 sens_hole_e = 2.4;
-// Otwór pod wkręt w ramce: M2.5 samogwintujący ~2.2 mm, M3 ~2.6 mm
-sens_pilot_d = 2.2;
+// Otwór pod wkręt w ramce: M2 samogwintujący ~1.7 mm (M2.5 ~2.2 mm, M3 ~2.6 mm)
+sens_pilot_d = 1.7;
 // Odstęp strony z układem BME280 od ściany końcowej (łebki wkrętów + luz przy wkładaniu)
 sens_gap = 5.5;
 // Wysokość okienka na śrubokręt w ścianie końcowej (przechodzi przez nie łebek wkrętu)
@@ -654,7 +654,7 @@ module bme_ghost() {
     // łebki wkrętów
     if (screw_s)
         for (y = s_hys) color([0.6, 0.6, 0.65]) translate([s_face, y, s_hz]) rotate([0, 90, 0])
-            cylinder(d = 4.5, h = 1.7);
+            cylinder(d = 3.8, h = 1.5);
 }
 
 wire_cols = [[0.55, 0.3, 0.2], [0.1, 0.1, 0.1], [0.95, 0.95, 0.95],

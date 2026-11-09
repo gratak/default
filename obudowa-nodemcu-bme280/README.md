@@ -73,20 +73,24 @@ Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokr
 
 ## Montaż
 
-1. Przykręć NodeMCU 4 wkrętami **M2.5 × 6** samogwintującymi (`pilot_d = 2.2`).
-   Pod M3 ustaw `pilot_d = 2.6`. Jeśli nie masz wkrętów, ustaw `board_fix = "peg"`:
+1. Przykręć NodeMCU 4 wkrętami **M2 × 6** samogwintującymi (`pilot_d = 1.7`).
+   Otwory w płytce mają ok. 3 mm, a łeb M2 ok. 3,5–4 mm, więc najlepiej dać podkładkę M2
+   albo wkręty z łbem z kołnierzem. Pod M2.5 ustaw `pilot_d = 2.2`, pod M3 `2.6`.
+   Jeśli nie masz wkrętów, ustaw `board_fix = "peg"`:
    wtedy na dystansach są kołki, a pokrywa ma 4 dociski, które trzymają płytkę.
 2. Nałóż wtyczkę na piny czujnika. Włóż czujnik od góry w szczelinę między ścianą końcową a ramką:
    pinami i wtyczką do góry, układem BME280 do ściany. Płytka staje dolną krawędzią na półce ramki,
    a wtyczka leży poziomo nad ramką.
 3. Przytrzymaj płytkę palcem od góry. Przez okienko w ścianie końcowej wkręć 2 wkręty
-   **M2.5 × 6** w poprzeczkę ramki (rysunek: `img/przykrecanie.png`):
+   **M2 × 6** w poprzeczkę ramki (rysunek: `img/przykrecanie.png`):
    - nałóż wkręt na śrubokręt z magnesem (albo przyklej go odrobiną plasteliny),
    - wsuń śrubokręt z wkrętem w lewy albo prawy koniec okienka; okienko ma 6 mm wysokości,
      więc łebek przez nie przechodzi, a jego zaokrąglone końce są dokładnie na osi otworów,
    - wkręt przechodzi przez otwór w płytce i wkręca się w poprzeczkę; łebek dociska płytkę do uchwytu.
 
-   Pod M3 ustaw `sens_pilot_d = 2.6`.
+   Otwory w czujniku mają 3–3,5 mm, więc pod łeb wkrętu M2 daj **podkładkę M2**
+   (albo użyj wkrętów z łbem z kołnierzem), żeby łeb nie przeszedł przez otwór.
+   Pod M2.5 ustaw `sens_pilot_d = 2.2`, pod M3 `2.6`.
 4. Poprowadź 6 przewodów z wtyczki prosto przez przepust w przegrodzie i podłącz je do pinów NodeMCU.
 5. Przepust zatkaj kawałkiem pianki, plasteliny albo kroplą kleju na gorąco,
    żeby ciepłe powietrze nie przechodziło do komory czujnika.
