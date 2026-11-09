@@ -32,8 +32,12 @@ artefakty, a F6 zawsze liczy poprawnie.
    Jeśli wtyk Twojego kabla jest grubszy, zwiększ `usb_w` i `usb_h`.
 3. **Nad laminatem jest 17 mm miejsca** (`above_clear`) na goldpiny, wtyczki dupont i zagięte kable.
    Jeśli pokrywa naciska na kable, zwiększ ten parametr.
-4. **Czujnik** stoi pionowo, układem BME280 w stronę ażurowej ściany końcowej (około 4 mm od niej).
-   Wtyczka 1×6 leży w kołysce, a słupek w pokrywie dociska ją od góry.
+4. **Czujnik jest przykręcony** dwoma wkrętami do dwóch słupków (18,5 mm) przy ażurowej ścianie końcowej.
+   Płytka leży poziomo, układem BME280 do góry, ok. 3 mm pod ażurową pokrywą. Wtyczka 1×6 zwisa w dół.
+   Wkręca się z góry przy zdjętej pokrywie, bez nakrętek. **Zmierz rozstaw otworów w czujniku**
+   (`sens_hole_dx`, domyślnie 10,7 mm, ustalone ze zdjęcia). Moduły GY-BME280 mają płytkę ok. 15,5 × 11,6 mm
+   i otwory Ø 3–3,5 mm, ale rozstawu sklepy nie podają.
+   Dawna wersja (wtyczka w kołysce + docisk pokrywą) jest dostępna jako `sensor_mount = "cradle"`.
 5. **Przegroda** jest domyślnie podwójna. Między ściankami jest 3 mm szczeliny powietrznej,
    otwartej w dnie i w pokrywie, więc działa jak komin i ciepło z ESP uchodzi do góry.
    `therm_gap = 0` daje zwykłą pojedynczą litą ściankę, a obudowa skraca się o 5 mm.
@@ -51,8 +55,10 @@ artefakty, a F6 zawsze liczy poprawnie.
 1. Przykręć NodeMCU 4 wkrętami **M2.5 × 6** samogwintującymi (`pilot_d = 2.2`).
    Pod M3 ustaw `pilot_d = 2.6`. Jeśli nie masz wkrętów, ustaw `board_fix = "peg"`:
    wtedy na dystansach są kołki, a pokrywa ma 4 dociski, które trzymają płytkę.
-2. Połóż wtyczkę czujnika w kołysce: kable w stronę przegrody, czujnik pionowo przy ścianie końcowej.
-3. Przełóż 6 przewodów przez wycięcie u góry przegrody i podłącz je do pinów.
+2. Nałóż wtyczkę na piny czujnika. Połóż czujnik na słupkach układem BME280 do góry, pinami w stronę
+   przegrody, i przykręć go 2 wkrętami **M2.5 × 6** (`sens_pilot_d = 2.2`; pod M3 ustaw 2.6).
+3. Poprowadź 6 przewodów spod wtyczki po dnie do przegrody, w górę i przez wycięcie u góry przegrody,
+   a potem podłącz je do pinów NodeMCU.
 4. Przepust zatkaj kawałkiem pianki, plasteliny albo kroplą kleju na gorąco,
    żeby ciepłe powietrze nie przechodziło do komory czujnika.
 5. Zatrzaśnij pokrywę. Przez otworki w dnie można spinaczem wcisnąć RST i FLASH.

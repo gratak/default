@@ -12,8 +12,10 @@
 //
 //  Płytka leży tak jak na zdjęciach: elementami (ESP-12, USB-C) w DÓŁ,
 //  pinami i kablami do GÓRY, na 4 dystansach pod otworami 52 x 25 mm.
-//  Czujnik stoi pionowo przy ażurowej ścianie końcowej; jego wtyczka
-//  dupont 1x6 leży w kołysce na podeście, a słupek w pokrywie ją dociska.
+//  Czujnik leży poziomo pod ażurową pokrywą, układem BME280 do góry,
+//  przykręcony 2 wkrętami do słupków przy ścianie końcowej; wtyczka dupont
+//  1x6 zwisa w dół. Wkręca się z góry przy zdjętej pokrywie, bez nakrętek.
+//  (sensor_mount = "cradle": stara wersja - wtyczka w kołysce + docisk.)
 //  Kable przechodzą przez wycięcie u góry przegrody (pokrywa je zamyka).
 //
 //  DRUK (bez podpór): part = "base" i part = "lid" (pokrywa jest już
@@ -59,8 +61,24 @@ button_holes = true;
 
 /* [Komora czujnika] */
 sens_len = 30;     // długość wewnętrzna komory czujnika
+// screw = płytka przykręcona do 2 słupków; cradle = wtyczka w kołysce + docisk pokrywą
+sensor_mount = "screw"; // [screw:Przykręcany do słupków, cradle:Wtyczka w kołysce + docisk]
+sens_w = 15.5;     // płytka czujnika: bok wzdłuż rzędu pinów
+sens_d = 11.6;     // płytka czujnika: bok od pinów do otworów
+sens_t = 1.6;      // grubość płytki czujnika
+// Rozstaw otworów montażowych czujnika (środek-środek) - ZMIERZ swój egzemplarz
+sens_hole_dx = 10.7;
+// Środek otworów od krawędzi płytki (tej bez pinów)
+sens_hole_e = 2.5;
+sens_post_d = 5.5; // średnica słupków
+// Otwór pod wkręt: M2.5 samogwintujący ~2.2 mm, M3 ~2.6 mm (otwory w czujniku ~3 mm)
+sens_pilot_d = 2.2;
+sens_wall_gap = 3; // odstęp płytki od ażurowej ściany końcowej
+// Luz nad płytką czujnika (łebki wkrętów, końcówki pinów) do spodu pokrywy
+sens_top_clear = 4.5;
 plug_w = 15.24;    // szerokość wtyczki dupont 1x6 (6 x 2.54)
 plug_h = 2.54;     // grubość wtyczki
+// --- tylko dla sensor_mount = "cradle" ---
 plug_ped = 2;      // podest pod wtyczką - czujnik wisi nad dnem
 cradle_x = 6;      // początek kołyski (od przegrody)
 cradle_len = 10;   // długość kołyski
@@ -130,12 +148,26 @@ holes = [for (i = [0, 1], j = [0, 1])
          [pcb_x0 + (pcb_l - hole_dx)/2 + i*hole_dx,
           pcb_y0 + (pcb_w - hole_dy)/2 + j*hole_dy]];
 
+// czujnik przykręcany (sensor_mount = "screw")
+screw_s  = sensor_mount == "screw";
+sens_z0  = Hb - sens_top_clear - sens_t;   // spód płytki czujnika = góra słupków
+sens_x1  = x_s1 - sens_wall_gap;           // krawędź płytki od strony ściany końcowej
+sens_x0  = sens_x1 - sens_d;               // krawędź z pinami (wtyczka zwisa tutaj)
+spost_x  = sens_x1 - sens_hole_e;          // oś słupków
+spost_ys = [yc - sens_hole_dx/2, yc + sens_hole_dx/2];
+spost_base = sens_post_d + 2;              // średnica stożkowej podstawy słupka
+
+// czujnik w kołysce (sensor_mount = "cradle")
+holddown  = !screw_s && plug_holddown;
 rail_t    = 1.2;
 cradle_iw = plug_w + 0.4;
 plug_z    = floor_t + plug_ped;    // spód wtyczki czujnika
 post_x    = x_s0 + cradle_x + cradle_len/2;
 
 echo(str("Obudowa zewn.: ", L, " x ", W, " x ", H, " mm  (dł. x szer. x wys.)"));
+if (screw_s)
+    echo(str("Czujnik: słupki ", sens_z0 - floor_t, " mm = miejsce pod płytką na wtyczkę ",
+             "(2.5 + 12..14 mm) i zagięcie kabli"));
 
 // ---------------------------------------------------------------------
 //  Pomocnicze kształty 2D
@@ -249,17 +281,29 @@ module base() {
                         cylinder(d1 = peg_d, d2 = peg_d - 0.8, h = 0.5);
                 }
             }
-            // kołyska wtyczki czujnika: podest + dwie prowadnice
-            translate([x_s0 + cradle_x, yc - cradle_iw/2 - rail_t, 0])
-                cube([cradle_len, cradle_iw + 2*rail_t, plug_z]);
-            for (s = [-1, 1])
-                translate([x_s0 + cradle_x, yc + s*(cradle_iw + rail_t)/2 - rail_t/2, 0])
-                    cube([cradle_len, rail_t, plug_z + plug_h + 0.6]);
+            if (screw_s) {
+                // dwa słupki pod czujnik + łącznik usztywniający
+                for (y = spost_ys) translate([spost_x, y, floor_t - eps]) {
+                    cylinder(d1 = spost_base, d2 = sens_post_d, h = 1);
+                    cylinder(d = sens_post_d, h = sens_z0 - floor_t + eps);
+                }
+                translate([spost_x - 0.8, spost_ys[0], floor_t - eps])
+                    cube([1.6, sens_hole_dx, sens_z0 - floor_t - 2]);
+            } else {
+                // kołyska wtyczki czujnika: podest + dwie prowadnice
+                translate([x_s0 + cradle_x, yc - cradle_iw/2 - rail_t, 0])
+                    cube([cradle_len, cradle_iw + 2*rail_t, plug_z]);
+                for (s = [-1, 1])
+                    translate([x_s0 + cradle_x, yc + s*(cradle_iw + rail_t)/2 - rail_t/2, 0])
+                        cube([cradle_len, rail_t, plug_z + plug_h + 0.6]);
+            }
         }
 
         // otwory pod wkręty
         if (board_fix == "screw")
             for (h = holes) translate([h[0], h[1], 0.8]) cylinder(d = pilot_d, h = Hb);
+        if (screw_s)
+            for (y = spost_ys) translate([spost_x, y, sens_z0 - 7]) cylinder(d = sens_pilot_d, h = 8);
 
         // USB-C (z fazką od zewnątrz)
         usb_cut();
@@ -291,9 +335,14 @@ module base() {
         through_long_walls(x_s0, floor_t) cell_grid(sens_len, div_top - floor_t);
         through_end_wall(L - wall, wall, floor_t) cell_grid(in_w, div_top - floor_t);
         translate([x_s0, wall, -1]) linear_extrude(floor_t + 2)
-            cell_grid(sens_len, in_w, 1.2,
-                      [[cradle_x - 0.5, in_w/2 - cradle_iw/2 - rail_t - 0.5,
-                        cradle_x + cradle_len + 0.5, in_w/2 + cradle_iw/2 + rail_t + 0.5]]);
+            if (screw_s)   // bez oczek pod słupkami i łącznikiem
+                cell_grid(sens_len, in_w, 1.2,
+                          [[spost_x - x_s0 - 1.4, spost_ys[0] - wall, spost_x - x_s0 + 1.4, spost_ys[1] - wall]],
+                          [for (y = spost_ys) [spost_x - x_s0, y - wall, spost_base/2 + 0.6]]);
+            else
+                cell_grid(sens_len, in_w, 1.2,
+                          [[cradle_x - 0.5, in_w/2 - cradle_iw/2 - rail_t - 0.5,
+                            cradle_x + cradle_len + 0.5, in_w/2 + cradle_iw/2 + rail_t + 0.5]]);
 
         // rowek zatrzasku wzdłuż ścian bocznych
         if (snap > 0)
@@ -354,8 +403,8 @@ module lid() {
             if (snap > 0)
                 for (xc = [(wall + x_d1)/2, (x_s0 + x_s1)/2])
                     both_sides() translate([xc - snap_len/2, wall + fit, zg]) ridge(snap_len, snap);
-            // słupek dociskający wtyczkę czujnika
-            if (plug_holddown)
+            // słupek dociskający wtyczkę czujnika (tylko wersja z kołyską)
+            if (holddown)
                 translate([post_x, yc, plug_z + plug_h + 0.3])
                     cylinder(d = 4, h = Hb - (plug_z + plug_h + 0.3) + eps);
             // dociski płytki (tylko przy mocowaniu na kołki)
@@ -374,7 +423,7 @@ module lid() {
         // ażur nad czujnikiem
         translate([x_s0, lip_in, Hb - 1]) linear_extrude(lid_t + 2)
             cell_grid(x_s1 - fit - lip_t - x_s0, W - 2*lip_in, 1.2, [],
-                      plug_holddown ? [[post_x - x_s0, yc - lip_in, 2 + 0.8]] : []);
+                      holddown ? [[post_x - x_s0, yc - lip_in, 2 + 0.8]] : []);
     }
 }
 
@@ -423,17 +472,34 @@ module nodemcu_ghost() {
     }
 }
 
-hx = x_s0 + 5.5;   // koniec wtyczki czujnika od strony kabli
+hx = x_s0 + 5.5;   // [cradle] koniec wtyczki czujnika od strony kabli
+hl = 12.5;         // długość wtyczki dupont (model poglądowy)
+spx = sens_x0 + 1.3;                // [screw] oś rzędu pinów czujnika
+spz = sens_z0 - 2.5 - hl;           // [screw] dół zwisającej wtyczki
 
 module bme_ghost() {
-    hl = 12.5;
-    color([0.07, 0.07, 0.07]) translate([hx, yc - plug_w/2, plug_z]) cube([hl, plug_w, plug_h]);
-    color([0.12, 0.12, 0.12]) translate([hx + hl, yc - plug_w/2, plug_z]) cube([2.5, plug_w, plug_h]);
-    px = hx + hl + 2.5;
-    color([0.36, 0.16, 0.55]) translate([px, yc - 7.75, plug_z]) cube([1.6, 15.5, 11.5]);
-    color([0.82, 0.82, 0.84]) translate([px + 1.6, yc - 1.25, plug_z + 7]) cube([0.9, 2.5, 2.5]);
-    for (i = [0:5]) color([0.85, 0.85, 0.85])
-        translate([px + 1.6, yc - 6.35 + i*2.54 - 0.32, plug_z + plug_h/2 - 0.32]) cube([3.4, 0.64, 0.64]);
+    if (screw_s) {
+        // płytka poziomo, BME280 do góry, wtyczka zwisa przy krawędzi z pinami
+        color([0.36, 0.16, 0.55]) difference() {
+            translate([sens_x0, yc - sens_w/2, sens_z0]) cube([sens_d, sens_w, sens_t]);
+            for (y = spost_ys) translate([spost_x, y, sens_z0 - 1]) cylinder(d = 3, h = sens_t + 2);
+        }
+        color([0.82, 0.82, 0.84]) translate([spost_x - 1.25, yc - 1.25, sens_z0 + sens_t]) cube([2.5, 2.5, 0.93]);
+        color([0.12, 0.12, 0.12]) translate([spx - 1.27, yc - plug_w/2, sens_z0 - 2.5]) cube([2.54, plug_w, 2.5]);
+        color([0.07, 0.07, 0.07]) translate([spx - 1.27, yc - plug_w/2, spz]) cube([2.54, plug_w, hl]);
+        for (i = [0:5]) color([0.85, 0.85, 0.85])
+            translate([spx - 0.32, yc - 6.35 + i*2.54 - 0.32, sens_z0 + sens_t]) cube([0.64, 0.64, 1.8]);
+        // łebki wkrętów
+        for (y = spost_ys) color([0.6, 0.6, 0.65]) translate([spost_x, y, sens_z0 + sens_t]) cylinder(d = 4.5, h = 1.7);
+    } else {
+        color([0.07, 0.07, 0.07]) translate([hx, yc - plug_w/2, plug_z]) cube([hl, plug_w, plug_h]);
+        color([0.12, 0.12, 0.12]) translate([hx + hl, yc - plug_w/2, plug_z]) cube([2.5, plug_w, plug_h]);
+        px = hx + hl + 2.5;
+        color([0.36, 0.16, 0.55]) translate([px, yc - sens_w/2, plug_z]) cube([1.6, sens_w, sens_d]);
+        color([0.82, 0.82, 0.84]) translate([px + 1.6, yc - 1.25, plug_z + 7]) cube([0.9, 2.5, 2.5]);
+        for (i = [0:5]) color([0.85, 0.85, 0.85])
+            translate([px + 1.6, yc - 6.35 + i*2.54 - 0.32, plug_z + plug_h/2 - 0.32]) cube([3.4, 0.64, 0.64]);
+    }
 }
 
 wire_cols = [[0.55, 0.3, 0.2], [0.1, 0.1, 0.1], [0.95, 0.95, 0.95],
@@ -451,15 +517,18 @@ module wires_ghost() {
         tx = pcb_x0 + t[0];
         ty = pcb_y0 + t[1];
         yn = yc - 3.5 + i*1.4;
-        color(wire_cols[i]) wire([
-            [hx, yc - 6.35 + i*2.54, plug_z + plug_h/2],
-            [hx - 2.5, yc - 5 + i*2, plug_z + 2.5],
-            [x_s0 + 1.2, yn, plug_z + 7],
+        yp = yc - 6.35 + i*2.54;
+        start = screw_s
+            ? [[spx, yp, spz + 0.5], [spx, yp, spz - 1], [spx - 3, yc - 5 + i*2, floor_t + 1.2],
+               [x_s0 + 1.2, yn, floor_t + 3]]
+            : [[hx, yp, plug_z + plug_h/2], [hx - 2.5, yc - 5 + i*2, plug_z + 2.5],
+               [x_s0 + 1.2, yn, plug_z + 7]];
+        color(wire_cols[i]) wire(concat(start, [
             [x_s0 + 1.2, yn, zw],
             [x_d1 - 2, yn, zw],
             [tx + (tx < x_d1 - 8 ? 3 : 1.5), ty + (ty > yc ? -1.5 : 1.5), dup_top + 1.2],
             [tx, ty, dup_top + 0.5],
-            [tx, ty, dup_top - 0.5]]);
+            [tx, ty, dup_top - 0.5]]));
     }
 }
 
