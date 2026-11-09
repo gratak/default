@@ -7,7 +7,8 @@ Parametryczna obudowa w OpenSCAD. Ma dwie komory oddzielone litą przegrodą:
 
 ![podgląd](img/podglad.png)
 
-Wymiary zewnętrzne: **111 × 38 × 30,6 mm**. Obie części to razem ok. 29 cm³ materiału, czyli do ok. 35 g PLA.
+Wymiary zewnętrzne: **111 × 38 × 30,6 mm** (z kołnierzami do uchwytu u dołu podstawy: 119 mm).
+Podstawa i pokrywa to razem ok. 29 cm³ materiału, a uchwyt ścienny ok. 24 cm³.
 
 ## Pliki
 
@@ -16,14 +17,17 @@ Wymiary zewnętrzne: **111 × 38 × 30,6 mm**. Obie części to razem ok. 29 cm�
 | `obudowa.scad` | model parametryczny; wszystkie wymiary są na górze pliku i w panelu Customizer |
 | `stl/obudowa_podstawa.stl` | podstawa ułożona do druku (dnem do stołu) |
 | `stl/obudowa_pokrywa.stl` | pokrywa ułożona do druku (górą do stołu) |
-| `img/` | rendery; `kable.png` pokazuje trasę kabli czujnika |
+| `stl/obudowa_uchwyt_scienny.stl` | uchwyt ścienny ułożony do druku (płytą do stołu) |
+| `img/` | rendery; `kable.png` to trasa kabli czujnika, `przykrecanie.png` przykręcanie czujnika, `uchwyt.png` uchwyt ścienny |
 
 ### Części w OpenSCAD
 
-Po otwarciu `obudowa.scad` widać **obie części ułożone do druku** (`part = "print"`).
+Po otwarciu `obudowa.scad` widać **podstawę i pokrywę ułożone do druku** (`part = "print"`).
 Pojedynczą część wybierasz w zmiennej `part` (albo w panelu Customizer):
 
-- `base` daje podstawę, `lid` pokrywę. Potem **F6** (render) i **F7** (zapis STL).
+- `base` daje podstawę, `lid` pokrywę, `mount` uchwyt ścienny, a `print_all` wszystkie 3 części naraz.
+  Potem **F6** (render) i **F7** (zapis STL).
+- `wall` pokazuje obudowę wsuwaną w uchwyt na ścianie.
 - `assembly`, `exploded` i `section` to tylko podgląd złożenia. Płytki i kable są w nim
   półprzezroczystym tłem, widocznym w F5. Do renderu F6 ani do pliku STL nie trafiają.
 
@@ -88,10 +92,31 @@ Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokr
    żeby ciepłe powietrze nie przechodziło do komory czujnika.
 6. Zatrzaśnij pokrywę. Przez otworki w dnie można spinaczem wcisnąć RST i FLASH.
 
+## Uchwyt ścienny
+
+![uchwyt](img/uchwyt.png)
+
+- Obudowa wisi **poziomo, pokrywą do pokoju**. Na dole podstawy, przy obu końcach, są kołnierze
+  ze skosem 45°. Kołnierze wsuwają się **od góry** w dwie prowadnice uchwytu na jaskółczy ogon.
+  Na dole prowadnic są ograniczniki, na których obudowa stoi; żeby ją zdjąć, unosisz ją do góry.
+- Prowadnice trzymają kołnierze od przodu, więc obudowa nie odchyli się od ściany.
+  U góry wejście prowadnic jest rozszerzone, żeby łatwo trafić.
+- Między dnem obudowy a ścianą zostaje **5 mm szczeliny** (`mnt_gap`). Otwory w dnie dalej działają,
+  a chłodna albo ciepła ściana mniej wpływa na pomiar.
+- **USB-C jest po lewej** (`usb_side = "left"`; dla prawej strony ustaw `"right"`).
+  Prowadnica po stronie USB ma wycięcie, przez które przechodzi wtyk kabla.
+- Uchwyt przykręcasz do ściany **2 wkrętami 3,5–4 mm** z kołkami, w rozstawie 70 mm (`screw_wall_dx`).
+  Otwory są stożkowe, a łby chowają się za obudową.
+- Druk: płytą do stołu, bez podpór. Jeśli obudowa wchodzi za ciasno, zwiększ `mnt_clear` (np. 0.35)
+  i przedrukuj sam uchwyt.
+- Jeśli nie chcesz kołnierzy na podstawie (obudowa tylko na półkę), ustaw `wall_mount = false`.
+
 ## Żeby odczyt temperatury był dokładny
 
 - Nie ustawiaj obudowy tak, żeby komora czujnika była **nad** elektroniką, bo ciepło idzie do góry.
-  Przy montażu pionowym czujnik ma być na dole.
-- Małe gumowe nóżki pod spodem dają szczelinom w dnie i kominowi dopływ powietrza.
+  W uchwycie ściennym obudowa wisi poziomo i ten warunek jest spełniony: ciepło z ESP uchodzi
+  szczelinami w górnej ścianie, obok komory czujnika, a nie przez nią.
+- Uchwyt najlepiej przykręcić na ścianie wewnętrznej, z dala od grzejnika, okna i słońca, ok. 1,5 m nad podłogą.
+- Na półce małe gumowe nóżki pod spodem dają szczelinom w dnie i kominowi dopływ powietrza.
 - W ESPHome odczyt co 60 s wystarczy (`update_interval: 60s`). BME280 pracuje wtedy w trybie wymuszonym
   i prawie się nie grzeje. Ewentualną stałą odchyłkę skoryguj filtrem `offset` po porównaniu z termometrem.

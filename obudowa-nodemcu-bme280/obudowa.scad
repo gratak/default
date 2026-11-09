@@ -34,7 +34,7 @@
 
 /* [Co pokazać] */
 // Części do druku albo podgląd złożenia
-part = "print"; // [print:Obie części do druku, base:Podstawa, lid:Pokrywa, assembly:Podgląd - złożona, exploded:Podgląd - rozłożona, section:Podgląd - przekrój]
+part = "print"; // [print:Podstawa + pokrywa do druku, print_all:Wszystkie 3 części do druku, base:Podstawa, lid:Pokrywa, mount:Uchwyt ścienny, wall:Podgląd - na ścianie, assembly:Podgląd - złożona, exploded:Podgląd - rozłożona, section:Podgląd - przekrój]
 // W podglądzie pokaż płytki i kable (półprzezroczyste, nie trafiają do STL)
 show_pcb = true;
 
@@ -123,6 +123,24 @@ floor_slots = true;  // szczeliny także w dnie pod płytką
 hole_shape = "hex";  // [hex:Plaster miodu, circle:Okrągłe oczka]
 hole_size = 3.5;     // wielkość oczka ażuru
 hole_web = 1.2;      // mostek między oczkami
+
+/* [Uchwyt ścienny] */
+// Kołnierze na końcach podstawy, którymi obudowa wsuwa się w uchwyt ścienny
+wall_mount = true;
+// Po której stronie jest USB-C, patrząc na zamontowaną obudowę
+usb_side = "left"; // [left:Lewa, right:Prawa]
+fl_w = 4;            // wysunięcie kołnierza poza ścianę czołową
+fl_t = 2;            // grubość kołnierza
+fl_base = 0.8;       // pionowa krawędź kołnierza (wyżej skos 45° = jaskółczy ogon)
+mnt_gap = 5;         // szczelina powietrzna między płytą uchwytu a dnem obudowy
+mnt_plate = 3.5;     // grubość płyty uchwytu
+mnt_clear = 0.25;    // luz w prowadnicach (zwiększ, jeśli obudowa wchodzi za ciasno)
+mnt_wall = 2.5;      // grubość zewnętrznej ścianki prowadnicy
+mnt_lip = 1.8;       // grubość wargi nad kołnierzem
+mnt_margin = 3;      // płyta wystaje tyle nad i pod obudowę
+screw_wall_d = 4;    // wkręty do ściany (3.5-4 mm, z kołkiem)
+screw_wall_head = 8; // średnica łba wkrętu stożkowego
+screw_wall_dx = 70;  // rozstaw otworów w płycie
 
 /* [Hidden] */
 $fn = 40;
@@ -291,9 +309,12 @@ module base() {
         union() {
             difference() {
                 // bryła z fazką 0.4 mm przy stole (kompensacja "stopy słonia")
-                hull() {
-                    translate([0.4, 0.4, 0]) linear_extrude(eps) rrect([L - 0.8, W - 0.8], corner_r - 0.4);
-                    translate([0, 0, 0.4]) linear_extrude(Hb - 0.4) rrect([L, W], corner_r);
+                union() {
+                    hull() {
+                        translate([0.4, 0.4, 0]) linear_extrude(eps) rrect([L - 0.8, W - 0.8], corner_r - 0.4);
+                        translate([0, 0, 0.4]) linear_extrude(Hb - 0.4) rrect([L, W], corner_r);
+                    }
+                    if (wall_mount) flange();
                 }
                 // komora elektroniki
                 translate([wall, wall, floor_t]) linear_extrude(Hb) rrect([el_len, in_w], r_in);
@@ -480,6 +501,103 @@ module lid_print() {
 }
 
 // ---------------------------------------------------------------------
+//  UCHWYT ŚCIENNY
+//  Obudowa wisi poziomo, pokrywą do pokoju, dnem do ściany. Kołnierze na
+//  końcach podstawy (skos 45°) wsuwają się od góry w dwie prowadnice
+//  (jaskółczy ogon), na dole są ograniczniki. Między dnem a płytą zostaje
+//  szczelina powietrzna, więc otwory w dnie dalej działają.
+//  Współrzędne jak w podstawie: Y = kierunek wsuwania (w górę na ścianie).
+// ---------------------------------------------------------------------
+fl_s  = fl_t - fl_base;                       // poziomy zasięg skosu kołnierza
+m_xo  = -(fl_w + mnt_clear + mnt_wall);       // zewnętrzna krawędź prowadnicy
+m_xl  = -fl_w + fl_s + 0.6;                   // wewnętrzna krawędź wargi
+m_zt  = fl_t + mnt_clear + mnt_lip;           // góra prowadnicy
+m_y0  = -mnt_margin;                          // dół uchwytu (ogranicznik)
+m_y1  = W + mnt_margin;                       // góra uchwytu (wejście)
+usb_yc = pcb_y0 + pcb_w/2 + usb_y;
+
+// kołnierz podstawy: wystaje fl_w za ściany czołowe, krawędź ze skosem 45°
+module flange() {
+    hull() {
+        translate([-fl_w + 0.4, 0.4, 0]) linear_extrude(eps)
+            rrect([L + 2*fl_w - 0.8, W - 0.8], corner_r - 0.4);
+        translate([-fl_w, 0, 0.4]) linear_extrude(fl_base - 0.4) rrect([L + 2*fl_w, W], corner_r);
+        translate([-fl_w + fl_s, fl_s, fl_t - eps]) linear_extrude(eps)
+            rrect([L + 2*fl_w - 2*fl_s, W - 2*fl_s], corner_r - fl_s);
+    }
+}
+
+// przekrój kanału prowadnicy (płaszczyzna X-Z, koniec obudowy przy x = 0)
+module channel2d() {
+    intersection() {
+        offset(delta = mnt_clear)
+            polygon([[-fl_w, -1], [-fl_w, fl_base], [-fl_w + fl_s, fl_t], [3, fl_t], [3, -1]]);
+        translate([-50, 0]) square([100, 50]);
+    }
+}
+// przekrój prowadnicy: podstawa pod dnem obudowy + ścianka + warga nad kołnierzem
+module rail2d() {
+    difference() {
+        union() {
+            translate([m_xo, -mnt_gap - eps]) square([2 - m_xo, mnt_gap + eps]);
+            polygon([[m_xo, -eps], [m_xl, -eps], [m_xl, m_zt], [m_xo + 1, m_zt], [m_xo, m_zt - 1]]);
+        }
+        channel2d();
+    }
+}
+// jedna prowadnica z ogranicznikiem; usb = wycięcie w wardze na wtyk USB-C
+module rail_end(usb = false, usb_at = 0) {
+    difference() {
+        union() {
+            translate([0, m_y1, 0]) rotate([90, 0, 0]) linear_extrude(m_y1 - m_y0) rail2d();
+            // ogranicznik na dole - obudowa na nim stoi
+            translate([m_xo, m_y0, -mnt_gap - eps]) cube([4.5 - m_xo, -m_y0, 3 + mnt_gap + eps]);
+        }
+        // rozszerzone wejście prowadnicy u góry
+        hull() {
+            translate([0, m_y1 + eps, 0]) rotate([90, 0, 0]) linear_extrude(eps) offset(delta = 1.2) channel2d();
+            translate([0, m_y1 - 1.6, 0]) rotate([90, 0, 0]) linear_extrude(eps) channel2d();
+        }
+        if (usb) translate([m_xo - 1, usb_at - 9, fl_t + 0.3]) cube([1 - m_xo, 18, 20]);
+    }
+}
+module mount_plate() {
+    pl = L - 2*m_xo + 2;
+    pw = m_y1 - m_y0;
+    translate([m_xo - 1, m_y0, -mnt_gap - mnt_plate]) hull() {
+        translate([0.4, 0.4, 0]) linear_extrude(eps) rrect([pl - 0.8, pw - 0.8], 4.6);
+        translate([0, 0, 0.4]) linear_extrude(mnt_plate - 1.4) rrect([pl, pw], 5);
+        translate([1, 1, mnt_plate - eps]) linear_extrude(eps) rrect([pl - 2, pw - 2], 4);
+    }
+}
+module mount() {
+    csk = (screw_wall_head - screw_wall_d)/2;
+    difference() {
+        union() {
+            mount_plate();
+            rail_end(usb_side == "left", usb_yc);
+            translate([L, 0, 0]) mirror([1, 0, 0]) rail_end(usb_side == "right", W - usb_yc);
+        }
+        // otwory na wkręty do ściany, stożkowe (łeb chowa się w płycie)
+        for (s = [-1, 1]) translate([L/2 + s*screw_wall_dx/2, W/2, 0]) {
+            translate([0, 0, -mnt_gap - mnt_plate - 1]) cylinder(d = screw_wall_d + 0.4, h = mnt_plate + 2);
+            translate([0, 0, -mnt_gap - csk - eps])
+                cylinder(d1 = screw_wall_d + 0.4, d2 = screw_wall_head + 0.4, h = csk + 2*eps);
+        }
+    }
+}
+// uchwyt ułożony do druku (płytą na stole)
+module mount_print() {
+    translate([1 - m_xo, -m_y0, mnt_gap + mnt_plate]) mount();
+}
+// obudowa ustawiona w uchwycie (USB po prawej = obrót o 180° w płaszczyźnie ściany)
+module in_mount(slide = 0) {
+    translate([0, slide, 0])
+        if (usb_side == "right") translate([L, W, 0]) rotate([0, 0, 180]) children();
+        else children();
+}
+
+// ---------------------------------------------------------------------
 //  Modele poglądowe płytek i kabli (tylko podgląd, nie drukować)
 // ---------------------------------------------------------------------
 pin_x0 = (pcb_l - 14*2.54) / 2;
@@ -587,9 +705,24 @@ module scene(lift = 0, cut = false) {
     if (show_pcb) %models();    // tło: widoczne w F5, pomijane w F6 i w STL
 }
 
+// widok na ścianie: obudowa wysunięta o "slide" nad uchwyt (wsuwanie od góry)
+module wall_view(slide = 25) {
+    rotate([90, 0, 0]) {
+        color([0.98, 0.62, 0.2]) mount();
+        in_mount(slide) enclosure();
+        %translate([m_xo - 30, m_y0 - 30, -mnt_gap - mnt_plate - 2]) cube([L - 2*m_xo + 60, m_y1 - m_y0 + 80, 2]);
+    }
+}
+
 if (part == "print")         { base(); translate([0, -W - 6, 0]) lid_print(); }
+else if (part == "print_all") {
+    translate([-m_xo + 1, 0, 0]) { base(); translate([0, -W - 6, 0]) lid_print(); }
+    translate([0, W + 8, 0]) mount_print();
+}
 else if (part == "base")     base();
 else if (part == "lid")      lid_print();
+else if (part == "mount")    mount_print();
+else if (part == "wall")     wall_view();
 else if (part == "assembly") scene();
 else if (part == "exploded") scene(32);
 else if (part == "section")  scene(0, true);
