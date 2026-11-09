@@ -85,8 +85,8 @@ sens_hole_e = 2.4;
 sens_pilot_d = 2.2;
 // Odstęp strony z układem BME280 od ściany końcowej (łebki wkrętów + luz przy wkładaniu)
 sens_gap = 5.5;
-// Wysokość okienka na śrubokręt w ścianie końcowej
-win_h = 5.5;
+// Wysokość okienka na śrubokręt w ścianie końcowej (przechodzi przez nie łebek wkrętu)
+win_h = 6;
 plug_w = 15.24;     // szerokość wtyczki dupont 1x6 (6 x 2.54)
 plug_h = 2.54;      // grubość wtyczki
 // --- tylko dla sensor_mount = "cradle" ---
@@ -377,7 +377,7 @@ module base() {
         through_end_wall(L - wall, wall, floor_t)
             cell_grid(in_w, div_top - floor_t, 1.2, [], [],
                       screw_s ? [[s_hys[0] - wall, s_hz - floor_t, s_hys[1] - wall, s_hz - floor_t,
-                                  win_h/2 + 0.8]] : []);
+                                  win_h/2 + 0.75]] : []);
         if (screw_s) through_end_wall(L - wall, 0, 0) sensor_window_2d();
         // ... i w dnie (bez oczek pod nóżkami ramki / pod kołyską)
         translate([x_s0, wall, -1]) linear_extrude(floor_t + 2)

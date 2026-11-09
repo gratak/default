@@ -76,8 +76,13 @@ Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokr
    pinami i wtyczką do góry, układem BME280 do ściany. Płytka staje dolną krawędzią na półce ramki,
    a wtyczka leży poziomo nad ramką.
 3. Przytrzymaj płytkę palcem od góry. Przez okienko w ścianie końcowej wkręć 2 wkręty
-   **M2.5 × 6** w poprzeczkę ramki. Najwygodniej śrubokrętem z magnesem: wkręt siedzi na
-   końcówce i przechodzi przez okienko. Pod M3 ustaw `sens_pilot_d = 2.6`.
+   **M2.5 × 6** w poprzeczkę ramki (rysunek: `img/przykrecanie.png`):
+   - nałóż wkręt na śrubokręt z magnesem (albo przyklej go odrobiną plasteliny),
+   - wsuń śrubokręt z wkrętem w lewy albo prawy koniec okienka; okienko ma 6 mm wysokości,
+     więc łebek przez nie przechodzi, a jego zaokrąglone końce są dokładnie na osi otworów,
+   - wkręt przechodzi przez otwór w płytce i wkręca się w poprzeczkę; łebek dociska płytkę do uchwytu.
+
+   Pod M3 ustaw `sens_pilot_d = 2.6`.
 4. Poprowadź 6 przewodów z wtyczki prosto przez przepust w przegrodzie i podłącz je do pinów NodeMCU.
 5. Przepust zatkaj kawałkiem pianki, plasteliny albo kroplą kleju na gorąco,
    żeby ciepłe powietrze nie przechodziło do komory czujnika.
