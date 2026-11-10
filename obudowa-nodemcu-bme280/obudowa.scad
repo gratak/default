@@ -11,7 +11,7 @@
 //    * ELEKTRONIKA – drobna siatka w pokrywie (krople wody nie przechodzą), USB-C z boku
 //    * CZUJNIK     – ażur (plaster miodu albo okrągłe oczka)
 //  Między nimi lita przegroda. Domyślnie PODWÓJNA: dwie pełne ścianki
-//  i pionowa szczelina powietrzna otwarta w dnie i w pokrywie (komin).
+//  i pionowa szczelina powietrzna, od spodu otwarta, od góry zamknięta pokrywą.
 //  therm_gap = 0  ->  zwykła pojedyncza lita ścianka.
 //
 //  NodeMCU leży jak na zdjęciach: elementami (ESP-12, USB-C) w DÓŁ,
@@ -106,6 +106,8 @@ gap_side = 2;      // luz boczny (z każdej strony)
 div_t = 2;         // grubość ścianki przegrody
 // Szczelina powietrzna między ściankami przegrody (0 = jedna lita ścianka)
 therm_gap = 3;
+// Otwór nad tą szczeliną w pokrywie (wypada nad przepustem kabli; zamknięty chroni przed kroplami)
+gap_lid_open = false;
 wire_w = 10;       // przepust na kable w przegrodzie - szerokość
 wire_d = 4;        // przepust - głębokość od góry przegrody
 
@@ -529,8 +531,8 @@ module lid() {
         translate([ex0, lip_in + 1.5, Hb - 1]) linear_extrude(lid_t + 2)
             if (lid_vent == "mesh") mesh_grid(ex1 - ex0, W - 2*lip_in - 3);
             else slot_row(ex1 - ex0, W - 2*lip_in - 3);
-        // szczelina termiczna otwarta w pokrywie
-        if (therm_gap > 0)
+        // szczelina termiczna otwarta w pokrywie (domyślnie zamknięta)
+        if (therm_gap > 0 && gap_lid_open)
             translate([x_d1 + div_t, lip_in + 1, Hb - 1]) cube([therm_gap, W - 2*lip_in - 2, lid_t + 2]);
         // ażur nad czujnikiem
         translate([x_s0, lip_in, Hb - 1]) linear_extrude(lid_t + 2)

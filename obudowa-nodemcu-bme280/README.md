@@ -61,7 +61,8 @@ a F6 zawsze liczy poprawnie.
    przepustu 10 × 4 mm u góry przegrody. Pokrywa domyka przepust żebrem.
    Dalej kable biegną górą komory elektroniki do pinów NodeMCU. Rysunek: `img/kable.png`.
 6. **Przegroda** jest domyślnie podwójna. Między ściankami jest 3 mm szczeliny powietrznej,
-   otwartej w dnie i w pokrywie, więc działa jak komin i ciepło z ESP uchodzi do góry.
+   otwartej od spodu. Od góry zamyka ją pokrywa, bo szczelina wypada nad przepustem kabli
+   i kropla mogłaby spłynąć po kablach do elektroniki (otwór w pokrywie przywraca `gap_lid_open = true`).
    `therm_gap = 0` daje zwykłą pojedynczą litą ściankę, a obudowa skraca się o 5 mm.
 
 Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokrywie): `sensor_mount = "cradle"`.
@@ -123,7 +124,7 @@ Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokr
   Na dole prowadnic są ograniczniki, na których obudowa stoi; żeby ją zdjąć, unosisz ją do góry.
 - Prowadnice trzymają kołnierze od przodu, więc obudowa nie odchyli się od ściany.
   U góry wejście prowadnic jest rozszerzone, żeby łatwo trafić.
-- Między dnem obudowy a ścianą zostaje **5 mm szczeliny** (`mnt_gap`). Ażur w dnie komory czujnika i komin w przegrodzie dalej działają,
+- Między dnem obudowy a ścianą zostaje **5 mm szczeliny** (`mnt_gap`). Ażur w dnie komory czujnika dalej działa,
   a chłodna albo ciepła ściana mniej wpływa na pomiar.
 - **USB-C jest po lewej** (`usb_side = "left"`; dla prawej strony ustaw `"right"`).
   Prowadnica po stronie USB ma wycięcie, przez które przechodzi wtyk kabla.
@@ -139,6 +140,6 @@ Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokr
   W uchwycie ściennym obudowa wisi poziomo i ten warunek jest spełniony: ciepło z ESP uchodzi
   siatką w pokrywie, obok komory czujnika, a nie przez nią.
 - Uchwyt najlepiej przykręcić na ścianie wewnętrznej, z dala od grzejnika, okna i słońca, ok. 1,5 m nad podłogą.
-- Na półce małe gumowe nóżki pod spodem dają ażurowi w dnie komory czujnika i kominowi dopływ powietrza.
+- Na półce małe gumowe nóżki pod spodem dają ażurowi w dnie komory czujnika dopływ powietrza.
 - W ESPHome odczyt co 60 s wystarczy (`update_interval: 60s`). BME280 pracuje wtedy w trybie wymuszonym
   i prawie się nie grzeje. Ewentualną stałą odchyłkę skoryguj filtrem `offset` po porównaniu z termometrem.
