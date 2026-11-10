@@ -2,7 +2,8 @@
 
 Parametryczna obudowa w OpenSCAD. Ma dwie komory oddzielone litą przegrodą:
 
-- **elektronika**: gładkie ściany boczne i pełne dno (tylko otworki pod RST/FLASH), podłużne szczeliny w pokrywie,
+- **elektronika**: gładkie ściany boczne i pełne dno (tylko otworki pod RST/FLASH), w pokrywie drobna siatka
+  (oczka 1,2 mm, krople wody przez nią nie wpadają),
   otwór na USB-C w ścianie czołowej
   (szczeliny można przywrócić: w ścianach `el_side_slots = true`, w dnie `floor_slots = true`),
 - **czujnik**: ażur (plaster miodu albo okrągłe oczka) w obu ścianach bocznych, w ścianie końcowej, w pokrywie i w dnie.
@@ -20,6 +21,7 @@ Podstawa i pokrywa to razem ok. 29 cm³ materiału, a uchwyt ścienny ok. 24 cm�
 | `stl/obudowa_podstawa.stl` | podstawa ułożona do druku (dnem do stołu) |
 | `stl/obudowa_pokrywa.stl` | pokrywa ułożona do druku (górą do stołu) |
 | `stl/obudowa_uchwyt_scienny.stl` | uchwyt ścienny ułożony do druku (płytą do stołu) |
+| `stl/probnik_siatki.stl` | mały próbnik siatki (oczka 0,8 / 1,0 / 1,2 / 1,5 mm) do sprawdzenia drukarki |
 | `img/` | rendery; `kable.png` to trasa kabli czujnika, `przykrecanie.png` przykręcanie czujnika, `uchwyt.png` uchwyt ścienny |
 
 ### Części w OpenSCAD
@@ -65,6 +67,14 @@ a F6 zawsze liczy poprawnie.
 Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokrywie): `sensor_mount = "cradle"`.
 
 ## Druk
+
+- **Siatka w pokrywie** nad elektroniką ma kwadratowe oczka 1,2 mm i mostki 0,8 mm (2 ścieżki dyszy 0.4).
+  Pokrywa drukuje się górą do stołu, więc siatka to zwykła płytka z otworami, bez nawisów.
+  Zanim wydrukujesz pokrywę, warto wydrukować `probnik_siatki.stl` (kilka minut) i sprawdzić,
+  które oczko wychodzi czysto. Jeśli 1,2 mm zarasta, ustaw `mesh_hole = 1.5`; jeśli 1,0 mm też jest
+  czyste, możesz dać `mesh_hole = 1.0` (drobniejsza siatka). Oczka najczęściej zarastają w pierwszej warstwie:
+  pomaga lżejszy docisk pierwszej warstwy albo kompensacja „stopy słonia” w slicerze.
+  Dawne szczeliny przywraca `lid_vent = "slots"`.
 
 - PLA wystarczy do pomieszczeń; w słońcu lub przy grzejniku użyj PETG albo ASA.
 - Warstwa 0,2 mm, 3 obrysy, wypełnienie 15–20 %, **bez podpór**. Oczka są sześciokątami
@@ -127,7 +137,7 @@ Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokr
 
 - Nie ustawiaj obudowy tak, żeby komora czujnika była **nad** elektroniką, bo ciepło idzie do góry.
   W uchwycie ściennym obudowa wisi poziomo i ten warunek jest spełniony: ciepło z ESP uchodzi
-  szczelinami w pokrywie (na ścianie stoją pionowo), obok komory czujnika, a nie przez nią.
+  siatką w pokrywie, obok komory czujnika, a nie przez nią.
 - Uchwyt najlepiej przykręcić na ścianie wewnętrznej, z dala od grzejnika, okna i słońca, ok. 1,5 m nad podłogą.
 - Na półce małe gumowe nóżki pod spodem dają ażurowi w dnie komory czujnika i kominowi dopływ powietrza.
 - W ESPHome odczyt co 60 s wystarczy (`update_interval: 60s`). BME280 pracuje wtedy w trybie wymuszonym

@@ -8,7 +8,7 @@
 //           płytki i kable są wtedy półprzezroczystym tłem i nie trafiają do STL
 //
 //  Dwie komory w jednym pudełku:
-//    * ELEKTRONIKA – podłużne szczeliny w pokrywie, USB-C z boku
+//    * ELEKTRONIKA – drobna siatka w pokrywie (krople wody nie przechodzą), USB-C z boku
 //    * CZUJNIK     – ażur (plaster miodu albo okrągłe oczka)
 //  Między nimi lita przegroda. Domyślnie PODWÓJNA: dwie pełne ścianki
 //  i pionowa szczelina powietrzna otwarta w dnie i w pokrywie (komin).
@@ -34,7 +34,7 @@
 
 /* [Co pokazać] */
 // Części do druku albo podgląd złożenia
-part = "print"; // [print:Podstawa + pokrywa do druku, print_all:Wszystkie 3 części do druku, base:Podstawa, lid:Pokrywa, mount:Uchwyt ścienny, wall:Podgląd - na ścianie, assembly:Podgląd - złożona, exploded:Podgląd - rozłożona, section:Podgląd - przekrój]
+part = "print"; // [print:Podstawa + pokrywa do druku, mesh_test:Próbnik siatki (test drukarki), print_all:Wszystkie 3 części do druku, base:Podstawa, lid:Pokrywa, mount:Uchwyt ścienny, wall:Podgląd - na ścianie, assembly:Podgląd - złożona, exploded:Podgląd - rozłożona, section:Podgląd - przekrój]
 // W podglądzie (F5) pokaż kolorowe modele płytek i kabli; w renderze F6 i w STL ich nie ma
 show_pcb = true;
 
@@ -125,6 +125,12 @@ slot_pitch = 4.5;    // rozstaw szczelin
 floor_slots = false; // szczeliny w dnie pod płytką
 // Pionowe szczeliny w ścianach bocznych komory elektroniki
 el_side_slots = false;
+// Pokrywa nad elektroniką: drobna siatka (krople wody nie przechodzą) albo dawne szczeliny
+lid_vent = "mesh"; // [mesh:Drobna siatka, slots:Szczeliny]
+// Oczko siatki (kwadrat). Dysza 0.4: pewnie 1.0-1.2 mm, mniejsze potrafią zarosnąć
+mesh_hole = 1.2;
+// Mostek między oczkami: 0.8 mm = 2 ścieżki dyszy 0.4
+mesh_web = 0.8;
 hole_shape = "hex";  // [hex:Plaster miodu, circle:Okrągłe oczka]
 hole_size = 3.5;     // wielkość oczka ażuru
 hole_web = 1.2;      // mostek między oczkami
@@ -232,6 +238,30 @@ module stadium(len, w) {
 }
 
 // rząd szczelin pionowych (wzdłuż Y) w prostokącie w x h
+// drobna siatka: kwadratowe oczka mesh_hole co (mesh_hole + mesh_web), wyśrodkowana w w x h
+module mesh_grid(w, h, hole = mesh_hole, web = mesh_web) {
+    p  = hole + web;
+    nx = floor((w - hole) / p);
+    ny = floor((h - hole) / p);
+    ox = (w - nx*p - hole) / 2;
+    oy = (h - ny*p - hole) / 2;
+    if (nx >= 0 && ny >= 0)
+        for (i = [0:nx], j = [0:ny]) translate([ox + i*p, oy + j*p]) square(hole);
+}
+
+// próbnik: 4 pola siatki (oczka 0.8 / 1.0 / 1.2 / 1.5 mm) w płytce o grubości pokrywy
+module mesh_test() {
+    sizes = [0.8, 1.0, 1.2, 1.5];
+    difference() {
+        linear_extrude(lid_t) rrect([4*14 + 2, 18], 2);
+        for (k = [0:3]) translate([2 + k*14, 2, -1]) linear_extrude(lid_t + 2)
+            mesh_grid(12, 10, sizes[k], mesh_web);
+    }
+    // opisy na górze płytki
+    for (k = [0:3]) translate([2 + k*14 + 6, 14.6, lid_t - eps]) linear_extrude(0.6)
+        text(["0.8", "1.0", "1.2", "1.5"][k], size = 2.6, halign = "center", font = "Liberation Sans:style=Bold");
+}
+
 module slot_row(w, h, m = 0) {
     n  = floor((w - 2*m - slot_w) / slot_pitch);
     ox = (w - n*slot_pitch) / 2;
@@ -495,9 +525,10 @@ module lid() {
                     translate([0, 0, -1]) cylinder(d = peg_d + 0.8, h = 2.5);
                 }
         }
-        // szczeliny nad elektroniką (poprzeczne)
+        // nad elektroniką: drobna siatka albo szczeliny poprzeczne
         translate([ex0, lip_in + 1.5, Hb - 1]) linear_extrude(lid_t + 2)
-            slot_row(ex1 - ex0, W - 2*lip_in - 3);
+            if (lid_vent == "mesh") mesh_grid(ex1 - ex0, W - 2*lip_in - 3);
+            else slot_row(ex1 - ex0, W - 2*lip_in - 3);
         // szczelina termiczna otwarta w pokrywie
         if (therm_gap > 0)
             translate([x_d1 + div_t, lip_in + 1, Hb - 1]) cube([therm_gap, W - 2*lip_in - 2, lid_t + 2]);
@@ -749,6 +780,7 @@ else if (part == "print_all") {
 else if (part == "base")     color(c_base) base();
 else if (part == "lid")      color(c_lid) lid_print();
 else if (part == "mount")    color(c_mount) mount_print();
+else if (part == "mesh_test") color(c_lid) mesh_test();
 else if (part == "wall")     wall_view();
 else if (part == "assembly") scene();
 else if (part == "exploded") scene(32);
