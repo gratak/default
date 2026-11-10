@@ -2,8 +2,9 @@
 
 Parametryczna obudowa w OpenSCAD. Ma dwie komory oddzielone litą przegrodą:
 
-- **elektronika**: gładkie ściany boczne, podłużne szczeliny w pokrywie i w dnie, otwór na USB-C w ścianie czołowej
-  (szczeliny w ścianach bocznych można przywrócić: `el_side_slots = true`),
+- **elektronika**: gładkie ściany boczne i pełne dno (tylko otworki pod RST/FLASH), podłużne szczeliny w pokrywie,
+  otwór na USB-C w ścianie czołowej
+  (szczeliny można przywrócić: w ścianach `el_side_slots = true`, w dnie `floor_slots = true`),
 - **czujnik**: ażur (plaster miodu albo okrągłe oczka) w obu ścianach bocznych, w ścianie końcowej, w pokrywie i w dnie.
 
 ![podgląd](img/podglad.png)
@@ -112,7 +113,7 @@ Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokr
   Na dole prowadnic są ograniczniki, na których obudowa stoi; żeby ją zdjąć, unosisz ją do góry.
 - Prowadnice trzymają kołnierze od przodu, więc obudowa nie odchyli się od ściany.
   U góry wejście prowadnic jest rozszerzone, żeby łatwo trafić.
-- Między dnem obudowy a ścianą zostaje **5 mm szczeliny** (`mnt_gap`). Otwory w dnie dalej działają,
+- Między dnem obudowy a ścianą zostaje **5 mm szczeliny** (`mnt_gap`). Ażur w dnie komory czujnika i komin w przegrodzie dalej działają,
   a chłodna albo ciepła ściana mniej wpływa na pomiar.
 - **USB-C jest po lewej** (`usb_side = "left"`; dla prawej strony ustaw `"right"`).
   Prowadnica po stronie USB ma wycięcie, przez które przechodzi wtyk kabla.
@@ -126,8 +127,8 @@ Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokr
 
 - Nie ustawiaj obudowy tak, żeby komora czujnika była **nad** elektroniką, bo ciepło idzie do góry.
   W uchwycie ściennym obudowa wisi poziomo i ten warunek jest spełniony: ciepło z ESP uchodzi
-  szczelinami w pokrywie (na ścianie stoją pionowo) i w dnie, obok komory czujnika, a nie przez nią.
+  szczelinami w pokrywie (na ścianie stoją pionowo), obok komory czujnika, a nie przez nią.
 - Uchwyt najlepiej przykręcić na ścianie wewnętrznej, z dala od grzejnika, okna i słońca, ok. 1,5 m nad podłogą.
-- Na półce małe gumowe nóżki pod spodem dają szczelinom w dnie i kominowi dopływ powietrza.
+- Na półce małe gumowe nóżki pod spodem dają ażurowi w dnie komory czujnika i kominowi dopływ powietrza.
 - W ESPHome odczyt co 60 s wystarczy (`update_interval: 60s`). BME280 pracuje wtedy w trybie wymuszonym
   i prawie się nie grzeje. Ewentualną stałą odchyłkę skoryguj filtrem `offset` po porównaniu z termometrem.

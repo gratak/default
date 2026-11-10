@@ -8,7 +8,7 @@
 //           płytki i kable są wtedy półprzezroczystym tłem i nie trafiają do STL
 //
 //  Dwie komory w jednym pudełku:
-//    * ELEKTRONIKA – podłużne szczeliny w pokrywie i w dnie, USB-C z boku
+//    * ELEKTRONIKA – podłużne szczeliny w pokrywie, USB-C z boku
 //    * CZUJNIK     – ażur (plaster miodu albo okrągłe oczka)
 //  Między nimi lita przegroda. Domyślnie PODWÓJNA: dwie pełne ścianki
 //  i pionowa szczelina powietrzna otwarta w dnie i w pokrywie (komin).
@@ -122,7 +122,7 @@ snap_len = 10;     // długość ząbka
 /* [Wentylacja] */
 slot_w = 2;          // szerokość szczelin
 slot_pitch = 4.5;    // rozstaw szczelin
-floor_slots = true;  // szczeliny także w dnie pod płytką
+floor_slots = false; // szczeliny w dnie pod płytką
 // Pionowe szczeliny w ścianach bocznych komory elektroniki
 el_side_slots = false;
 hole_shape = "hex";  // [hex:Plaster miodu, circle:Okrągłe oczka]
