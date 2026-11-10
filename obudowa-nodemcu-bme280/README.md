@@ -2,7 +2,8 @@
 
 Parametryczna obudowa w OpenSCAD. Ma dwie komory oddzielone litą przegrodą:
 
-- **elektronika**: podłużne szczeliny w ścianach, w pokrywie i w dnie, otwór na USB-C w ścianie czołowej,
+- **elektronika**: gładkie ściany boczne, podłużne szczeliny w pokrywie i w dnie, otwór na USB-C w ścianie czołowej
+  (szczeliny w ścianach bocznych można przywrócić: `el_side_slots = true`),
 - **czujnik**: ażur (plaster miodu albo okrągłe oczka) w obu ścianach bocznych, w ścianie końcowej, w pokrywie i w dnie.
 
 ![podgląd](img/podglad.png)
@@ -68,8 +69,14 @@ Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokr
 - Warstwa 0,2 mm, 3 obrysy, wypełnienie 15–20 %, **bez podpór**. Oczka są sześciokątami
   „ostrzem do góry”, rowki zatrzasku i spód półki pod czujnik mają ścianki pod 45°,
   a poprzeczka ramki czujnika to krótki most (ok. 17 mm), więc nic nie wymaga podpór.
-- Pokrywa trzyma się na kołnierzu i 4 ząbkach zatrzasku. Jeśli wchodzi za ciasno, zwiększ `fit` (np. 0.3)
-  albo zmniejsz `snap` (np. 0.3). Przy obu końcach są wcięcia do podważenia pokrywy.
+- Pokrywa trzyma się na kołnierzu, 4 ząbkach zatrzasku (0,6 mm) i 10 pionowych żeberkach dociskowych.
+  Żeberka przy zakładaniu lekko się wgniatają i kasują luz, więc pokrywa siedzi pewnie niezależnie
+  od dokładności drukarki. Dopasowanie zmieniasz parametrami pokrywy:
+  - nadal luźno: `crush = 0.4`,
+  - za ciasno: `crush = 0.2` (albo `0`), ewentualnie `fit = 0.2`,
+  - zatrzask za mocny: `snap = 0.4`.
+
+  Przy obu końcach są wcięcia do podważenia pokrywy.
 
 ## Montaż
 
@@ -119,7 +126,7 @@ Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokr
 
 - Nie ustawiaj obudowy tak, żeby komora czujnika była **nad** elektroniką, bo ciepło idzie do góry.
   W uchwycie ściennym obudowa wisi poziomo i ten warunek jest spełniony: ciepło z ESP uchodzi
-  szczelinami w górnej ścianie, obok komory czujnika, a nie przez nią.
+  szczelinami w pokrywie (na ścianie stoją pionowo) i w dnie, obok komory czujnika, a nie przez nią.
 - Uchwyt najlepiej przykręcić na ścianie wewnętrznej, z dala od grzejnika, okna i słońca, ok. 1,5 m nad podłogą.
 - Na półce małe gumowe nóżki pod spodem dają szczelinom w dnie i kominowi dopływ powietrza.
 - W ESPHome odczyt co 60 s wystarczy (`update_interval: 60s`). BME280 pracuje wtedy w trybie wymuszonym

@@ -8,7 +8,7 @@
 //           płytki i kable są wtedy półprzezroczystym tłem i nie trafiają do STL
 //
 //  Dwie komory w jednym pudełku:
-//    * ELEKTRONIKA – podłużne szczeliny (ściany, pokrywa, dno), USB-C z boku
+//    * ELEKTRONIKA – podłużne szczeliny w pokrywie i w dnie, USB-C z boku
 //    * CZUJNIK     – ażur (plaster miodu albo okrągłe oczka)
 //  Między nimi lita przegroda. Domyślnie PODWÓJNA: dwie pełne ścianki
 //  i pionowa szczelina powietrzna otwarta w dnie i w pokrywie (komin).
@@ -112,14 +112,19 @@ wire_d = 4;        // przepust - głębokość od góry przegrody
 /* [Pokrywa i zatrzaski] */
 lip_h = 2.5;       // wysokość kołnierza pokrywy
 lip_t = 1.2;       // grubość kołnierza
-fit = 0.2;         // luz pasowania (zwiększ, jeśli pokrywa wchodzi za ciasno)
-snap = 0.5;        // wysokość ząbków zatrzasku (0 = tylko na wcisk)
+fit = 0.15;        // luz pasowania (zwiększ, jeśli pokrywa wchodzi za ciasno)
+snap = 0.6;        // wysokość ząbków zatrzasku (0 = tylko na wcisk)
+// Żeberka dociskowe na kołnierzu pokrywy: przy zakładaniu lekko się wgniatają
+// i kasują luz (0 = bez; za ciasno -> 0.2, nadal luźno -> 0.4)
+crush = 0.3;
 snap_len = 10;     // długość ząbka
 
 /* [Wentylacja] */
 slot_w = 2;          // szerokość szczelin
 slot_pitch = 4.5;    // rozstaw szczelin
 floor_slots = true;  // szczeliny także w dnie pod płytką
+// Pionowe szczeliny w ścianach bocznych komory elektroniki
+el_side_slots = false;
 hole_shape = "hex";  // [hex:Plaster miodu, circle:Okrągłe oczka]
 hole_size = 3.5;     // wielkość oczka ażuru
 hole_web = 1.2;      // mostek między oczkami
@@ -378,7 +383,7 @@ module base() {
             translate([x_d1 + div_t, wall + 1.5, -1]) cube([therm_gap, in_w - 3, floor_t + 2]);
 
         // ELEKTRONIKA: pionowe szczeliny w ścianie przedniej i tylnej
-        through_long_walls(wall + 3, floor_t + 1.5)
+        if (el_side_slots) through_long_walls(wall + 3, floor_t + 1.5)
             slot_row(x_d1 - 2 - (wall + 3), div_top - 1.5 - (floor_t + 1.5));
 
         // ELEKTRONIKA: podłużne szczeliny w dnie pod płytką
@@ -467,6 +472,14 @@ module lid() {
             // żebra domykające przegrodę i przepust kabli
             for (x = rib_xs)
                 translate([x, wall + fit, Hb - lip_h]) cube([div_t, in_w - 2*fit, lip_h + eps]);
+            // żeberka dociskowe: 3 na każdym długim boku, 2 na każdym końcu
+            if (crush > 0) {
+                for (x = [12, (x_d1 + x_s0)/2 - 12, x_s1 - 8]) both_sides() translate([x, wall + fit, 0]) crush_rib();
+                for (y = [yc - 8, yc + 8]) {
+                    translate([wall + fit, y, 0]) rotate(90) mirror([0, 1, 0]) crush_rib();
+                    translate([L - wall - fit, y, 0]) rotate(90) crush_rib();
+                }
+            }
             // ząbki zatrzasków: środek komory elektroniki i komory czujnika
             if (snap > 0)
                 for (xc = [(wall + x_d1)/2, (x_s0 + x_s1)/2])
@@ -495,6 +508,14 @@ module lid() {
     }
 }
 
+// pionowe żeberko na zewnętrznej ścianie kołnierza (wystaje o crush w -Y),
+// na dole ścięte, żeby pokrywa łatwo trafiała
+module crush_rib() {
+    translate([0, 0.5 - crush, 0]) {
+        translate([0, 0, Hb - lip_h + 0.8]) cylinder(r = 0.5, h = lip_h - 0.8 + eps, $fn = 16);
+        translate([0, 0, Hb - lip_h]) cylinder(r1 = 0.5 - crush, r2 = 0.5, h = 0.8 + eps, $fn = 16);
+    }
+}
 // pokrywa obrócona do druku (góra na stole)
 module lid_print() {
     translate([0, W, Hb + lid_t]) rotate([180, 0, 0]) lid();
