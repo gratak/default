@@ -6,7 +6,8 @@ Parametryczna obudowa w OpenSCAD. Ma dwie komory oddzielone litą przegrodą:
   (oczka 1,2 mm, krople wody przez nią nie wpadają),
   otwór na USB-C w ścianie czołowej
   (szczeliny można przywrócić: w ścianach `el_side_slots = true`, w dnie `floor_slots = true`),
-- **czujnik**: ażur (plaster miodu albo okrągłe oczka) w obu ścianach bocznych, w ścianie końcowej, w pokrywie i w dnie.
+- **czujnik**: ażur (plaster miodu) w obu ścianach bocznych, w ścianie końcowej i w dnie, a w pokrywie ta sama
+  drobna siatka co nad elektroniką (`lid_sensor_mesh = false` przywraca ażur w pokrywie).
 
 ![podgląd](img/podglad.png)
 
@@ -69,7 +70,7 @@ Wersja bez wkrętów do czujnika (wtyczka w kołysce, dociskana słupkiem w pokr
 
 ## Druk
 
-- **Siatka w pokrywie** nad elektroniką ma kwadratowe oczka 1,2 mm i mostki 0,8 mm (2 ścieżki dyszy 0.4).
+- **Siatka w pokrywie** (nad elektroniką i nad czujnikiem) ma kwadratowe oczka 1,2 mm i mostki 0,8 mm (2 ścieżki dyszy 0.4).
   Pokrywa drukuje się górą do stołu, więc siatka to zwykła płytka z otworami, bez nawisów.
   Zanim wydrukujesz pokrywę, warto wydrukować `probnik_siatki.stl` (kilka minut) i sprawdzić,
   które oczko wychodzi czysto. Jeśli 1,2 mm zarasta, ustaw `mesh_hole = 1.5`; jeśli 1,0 mm też jest

@@ -9,7 +9,7 @@
 //
 //  Dwie komory w jednym pudełku:
 //    * ELEKTRONIKA – drobna siatka w pokrywie (krople wody nie przechodzą), USB-C z boku
-//    * CZUJNIK     – ażur (plaster miodu albo okrągłe oczka)
+//    * CZUJNIK     – ażur w ścianach i dnie, drobna siatka w pokrywie
 //  Między nimi lita przegroda. Domyślnie PODWÓJNA: dwie pełne ścianki
 //  i pionowa szczelina powietrzna, od spodu otwarta, od góry zamknięta pokrywą.
 //  therm_gap = 0  ->  zwykła pojedyncza lita ścianka.
@@ -133,9 +133,12 @@ lid_vent = "mesh"; // [mesh:Drobna siatka, slots:Szczeliny]
 mesh_hole = 1.2;
 // Mostek między oczkami: 0.8 mm = 2 ścieżki dyszy 0.4
 mesh_web = 0.8;
-hole_shape = "hex";  // [hex:Plaster miodu, circle:Okrągłe oczka]
-hole_size = 3.5;     // wielkość oczka ażuru
-hole_web = 1.2;      // mostek między oczkami
+// Ażur w ścianach i dnie komory czujnika (mesh = drobna siatka jak w pokrywie)
+hole_shape = "hex"; // [hex:Plaster miodu, circle:Okrągłe oczka, mesh:Drobna siatka]
+// Pokrywa nad czujnikiem: drobna siatka (krople wody nie przechodzą) albo ażur jak w ścianach
+lid_sensor_mesh = true;
+hole_size = 3.5;     // wielkość oczka ażuru (tylko hex / circle)
+hole_web = 1.2;      // mostek między oczkami (tylko hex / circle)
 
 /* [Uchwyt ścienny] */
 // Kołnierze na końcach podstawy, którymi obudowa wsuwa się w uchwyt ścienny
@@ -291,6 +294,30 @@ function hits(cx, cy, rr, es) =
 // bez otworów w miejscach: ex = prostokąty [x0,y0,x1,y1], ec = koła [x,y,r],
 // es = podłużne otwory [x0,y0,x1,y1,r] (odcinek + promień)
 module cell_grid(w, h, m = 1.2, ex = [], ec = [], es = []) {
+    if (hole_shape == "mesh") mesh_cells(w, h, m, ex, ec, es);
+    else hex_cells(w, h, m, ex, ec, es);
+}
+
+// drobna siatka z kwadratowych oczek (mesh_hole co mesh_hole + mesh_web) z tymi samymi wykluczeniami
+module mesh_cells(w, h, m, ex, ec, es) {
+    f  = mesh_hole;
+    p  = mesh_hole + mesh_web;
+    rr = f/sqrt(2);                 // połowa przekątnej oczka
+    nx = floor((w - 2*m - f) / p);
+    ny = floor((h - 2*m - f) / p);
+    ox = (w - nx*p) / 2;
+    oy = (h - ny*p) / 2;
+    if (nx >= 0 && ny >= 0)
+        for (j = [0:ny], i = [0:nx]) {
+            cx = ox + i*p;
+            cy = oy + j*p;
+            if (!hit(cx, cy, f/2 + mesh_web/2, f/2 + mesh_web/2, ex) &&
+                !hitc(cx, cy, rr, ec) && !hits(cx, cy, rr, es))
+                translate([cx - f/2, cy - f/2]) square(f);
+        }
+}
+
+module hex_cells(w, h, m, ex, ec, es) {
     f  = hole_size;
     hh = hole_shape == "hex" ? 2*hole_size/sqrt(3) : hole_size;
     px = f + hole_web;
@@ -534,10 +561,14 @@ module lid() {
         // szczelina termiczna otwarta w pokrywie (domyślnie zamknięta)
         if (therm_gap > 0 && gap_lid_open)
             translate([x_d1 + div_t, lip_in + 1, Hb - 1]) cube([therm_gap, W - 2*lip_in - 2, lid_t + 2]);
-        // ażur nad czujnikiem
+        // nad czujnikiem: drobna siatka (domyślnie) albo ażur jak w ścianach
         translate([x_s0, lip_in, Hb - 1]) linear_extrude(lid_t + 2)
-            cell_grid(x_s1 - fit - lip_t - x_s0, W - 2*lip_in, 1.2, [],
-                      holddown ? [[post_x - x_s0, yc - lip_in, 2 + 0.8]] : []);
+            if (lid_sensor_mesh)
+                mesh_cells(x_s1 - fit - lip_t - x_s0, W - 2*lip_in, 1.2, [],
+                           holddown ? [[post_x - x_s0, yc - lip_in, 2 + 0.8]] : [], []);
+            else
+                cell_grid(x_s1 - fit - lip_t - x_s0, W - 2*lip_in, 1.2, [],
+                          holddown ? [[post_x - x_s0, yc - lip_in, 2 + 0.8]] : []);
     }
 }
 
