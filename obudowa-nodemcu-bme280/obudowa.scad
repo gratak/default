@@ -130,7 +130,7 @@ el_side_slots = false;
 // Pokrywa nad elektroniką: drobna siatka (krople wody nie przechodzą) albo dawne szczeliny
 lid_vent = "mesh"; // [mesh:Drobna siatka, slots:Szczeliny]
 // Oczko siatki (kwadrat). Dysza 0.4: pewnie 1.0-1.2 mm, mniejsze potrafią zarosnąć
-mesh_hole = 1.2;
+mesh_hole = 1.5;
 // Mostek między oczkami: 0.8 mm = 2 ścieżki dyszy 0.4
 mesh_web = 0.8;
 // Ażur w ścianach i dnie komory czujnika (mesh = drobna siatka jak w pokrywie)
